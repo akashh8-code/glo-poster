@@ -1,0 +1,2800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>Gold Poster Studio — Everglo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Playfair+Display:wght@400;700;900&family=IM+Fell+English:ital@0;1&family=Bebas+Neue&family=Tiro+Malayalam&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold:#FFD700;--gold-b:#C8960C;--gold-d:#8B6508;--gold-p:#F5E6A3;
+  --bg0:#080806;--bg1:#0F0E09;--bg2:#141209;--bg3:#1A180E;--bg4:#201E12;
+  --bor:rgba(255,215,0,.18);--borf:rgba(255,215,0,.07);
+  --t1:#F0DFA0;--t2:#8A7A48;--t3:#4A4228;
+  --red:#E84040;--grn:#4EC97A;
+  --hh:56px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Cormorant Garamond',serif;background:var(--bg0);color:var(--t1);min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg1)}::-webkit-scrollbar-thumb{background:var(--gold-d);border-radius:2px}
+
+/* LOADER */
+#ld{position:fixed;inset:0;background:var(--bg0);display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity .5s,visibility .5s}
+#ld.gone{opacity:0;visibility:hidden;pointer-events:none}
+.ld-ico{font-size:3rem;color:var(--gold);animation:pulse 1.6s ease-in-out infinite;display:block;margin-bottom:.9rem;text-align:center}
+.ld-t{font-family:'Cinzel Decorative',serif;font-size:1rem;color:var(--gold);letter-spacing:5px;text-align:center;margin-bottom:.3rem}
+.ld-s{font-family:'Cinzel',serif;font-size:.62rem;color:var(--t2);letter-spacing:3px;text-align:center;animation:blink 1.2s step-end infinite}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(.85);opacity:.45}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* HEADER */
+.hdr{height:var(--hh);background:var(--bg1);border-bottom:1px solid var(--bor);display:flex;align-items:center;justify-content:space-between;padding:0 1.1rem;position:sticky;top:0;z-index:200;box-shadow:0 2px 20px #000a}
+.hl{display:flex;align-items:center;gap:.55rem}
+.hgem{font-size:1.4rem;color:var(--gold)}
+.htxt{font-family:'Cinzel Decorative',serif;font-size:.75rem;color:var(--t1);letter-spacing:3px}
+.htxt span{color:var(--gold)}
+.hr{display:flex;align-items:center;gap:.65rem}
+.rpill{display:flex;align-items:center;gap:.4rem;background:rgba(255,215,0,.06);border:1px solid var(--bor);padding:.25rem .7rem;border-radius:4px}
+.rplbl{font-family:'Cinzel',serif;font-size:.55rem;color:var(--t2);letter-spacing:2px}
+.rpval{font-family:'Cinzel',serif;font-size:.82rem;color:var(--gold);font-weight:700}
+.bico{width:32px;height:32px;background:rgba(255,215,0,.06);border:1px solid var(--bor);border-radius:4px;color:var(--gold);font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s}
+.bico:hover{background:rgba(255,215,0,.14);transform:rotate(20deg)}
+
+/* TOAST */
+#toast{position:fixed;bottom:1.1rem;left:50%;transform:translateX(-50%) translateY(90px);background:var(--bg3);border:1px solid var(--bor);color:var(--t1);padding:.55rem 1.1rem;border-radius:7px;font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:1px;z-index:9900;transition:transform .3s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;max-width:88vw;text-align:center}
+#toast.show{transform:translateX(-50%) translateY(0)}
+#toast.ok{border-color:var(--grn);color:var(--grn)}
+#toast.err{border-color:var(--red);color:var(--red)}
+
+/* LAYOUT */
+.app{display:flex;height:calc(100vh - var(--hh));overflow:hidden}
+
+/* SIDEBAR */
+.sb{width:280px;min-width:280px;background:var(--bg2);border-right:1px solid var(--bor);overflow-y:auto;padding:.75rem;display:flex;flex-direction:column;gap:.75rem}
+.pnl{background:var(--bg3);border:1px solid var(--borf);border-radius:9px;padding:.85rem;transition:border-color .2s;min-height:0}
+.pnl:hover{border-color:var(--bor)}
+.ptit{font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:.7rem;display:flex;align-items:center;gap:.35rem}
+
+/* UPLOAD
+   KEY FIX: label wraps the whole zone — one tap anywhere opens
+   the native file picker on iOS Safari, Android Chrome, all browsers.
+   No JS .click() needed. No pointer-events tricks needed.
+*/
+.dz{
+  position:relative;
+  border:2px dashed var(--bor);
+  border-radius:7px;
+  cursor:pointer;
+  transition:.2s;
+  display:block; /* label is inline by default */
+  -webkit-tap-highlight-color:rgba(255,215,0,.1);
+  min-height:110px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.dz:hover,.dz.over{border-color:var(--gold);background:rgba(255,215,0,.03)}
+/* Invisible but accessible file input — NOT display:none or hidden */
+.dz-inp{
+  /* sr-only: hidden but activatable via parent <label> click */
+  position:absolute;
+  width:1px;height:1px;
+  opacity:0;
+  overflow:hidden;
+  pointer-events:none;
+}
+.dzi{padding:1.1rem .6rem;text-align:center;width:100%}
+.dzico{font-size:1.5rem;color:var(--gold-d);margin-bottom:.35rem}
+.dztxt{font-family:'Cinzel',serif;font-size:.65rem;color:var(--t2);letter-spacing:1px;margin-bottom:.18rem}
+.dzsub{font-size:.6rem;color:var(--t3);margin-bottom:.55rem}
+.bbrw{
+  display:inline-block;
+  background:rgba(255,215,0,.09);
+  border:1px solid var(--bor);
+  color:var(--gold-p);
+  padding:.3rem .85rem;
+  border-radius:4px;
+  font-family:'Cinzel',serif;
+  font-size:.6rem;
+  letter-spacing:2px;
+  cursor:pointer;
+  transition:.2s;
+}
+.bbrw:hover{background:rgba(255,215,0,.18)}
+.thumb{width:100%;border-radius:5px;display:none;margin-top:.55rem;border:1px solid var(--bor)}
+
+/* RATE */
+.rrows{margin-bottom:.7rem}
+.rrow{display:flex;justify-content:space-between;align-items:center;padding:.35rem 0}
+.rlbl{font-family:'Cinzel',serif;font-size:.6rem;color:var(--t2);letter-spacing:1px}
+.rval{font-family:'Cinzel',serif;font-size:.88rem;color:var(--gold);font-weight:700}
+.rdiv{height:1px;background:var(--borf)}
+.rmeta{font-size:.58rem;color:var(--t3);margin-top:.35rem}
+
+/* CHANGE INDICATOR */
+.chg-row{display:flex;justify-content:space-between;align-items:center;padding:.4rem 0;margin-top:.2rem;border-top:1px dashed var(--borf)}
+.chg-lbl{font-family:'Cinzel',serif;font-size:.58rem;color:var(--t2);letter-spacing:1px}
+.chg-val{font-family:'Cinzel',serif;font-size:.78rem;font-weight:700;display:flex;align-items:center;gap:.25rem}
+.chg-val.up{color:var(--red)}
+.chg-val.dn{color:var(--grn)}
+.chg-val.flat{color:var(--t2)}
+.chg-actions{display:flex;gap:.35rem;margin-top:.45rem}
+
+/* QUICK TOGGLES */
+.qtog-row{display:flex;flex-direction:column;gap:.5rem;margin-top:.65rem;padding-top:.55rem;border-top:1px dashed var(--borf)}
+.qtog{display:flex;align-items:center;gap:.5rem;cursor:pointer;user-select:none;flex-shrink:0}
+.qtog-tb .qtog-lbl{font-size:.62rem;white-space:nowrap}
+.qtog input{position:absolute;opacity:0;width:0;height:0}
+.qtog-sw{
+  position:relative;width:30px;height:17px;flex-shrink:0;
+  background:rgba(255,215,0,.12);
+  border:1px solid var(--bor);
+  border-radius:10px;
+  transition:.2s;
+}
+.qtog-sw::before{
+  content:'';position:absolute;top:1px;left:1px;
+  width:13px;height:13px;border-radius:50%;
+  background:var(--t2);
+  transition:.2s;
+}
+.qtog input:checked + .qtog-sw{background:rgba(255,215,0,.3);border-color:var(--gold)}
+.qtog input:checked + .qtog-sw::before{transform:translateX(13px);background:var(--gold)}
+.qtog-lbl{font-family:'Cinzel',serif;font-size:.6rem;color:var(--t2);letter-spacing:.5px}
+.qtog input:checked ~ .qtog-lbl{color:var(--gold-p)}
+.qsc-row{display:flex;align-items:center;gap:.4rem;margin:.1rem 0 .15rem 1.7rem}
+.rerr{font-size:.6rem;color:var(--red);margin-top:.3rem;padding:.3rem .45rem;background:rgba(232,64,64,.07);border:1px solid rgba(232,64,64,.2);border-radius:4px;display:none}
+.astatus{font-size:.6rem;font-family:'Cinzel',serif;letter-spacing:.5px;padding:.3rem .5rem;border-radius:4px;margin-top:.3rem;display:none}
+.astatus.ok{color:var(--grn);background:rgba(78,201,122,.07);border:1px solid rgba(78,201,122,.2)}
+.astatus.err{color:var(--red);background:rgba(232,64,64,.07);border:1px solid rgba(232,64,64,.2)}
+
+/* SOURCE TOGGLE */
+.src-tog{display:flex;gap:.3rem;margin:.55rem 0;background:rgba(255,215,0,.04);border:1px solid var(--borf);border-radius:6px;padding:.25rem}
+.src-opt{flex:1;background:transparent;border:none;color:var(--t2);font-family:'Cinzel',serif;font-size:.56rem;letter-spacing:1px;padding:.4rem .3rem;border-radius:4px;cursor:pointer;transition:.2s;display:flex;flex-direction:column;align-items:center;gap:.2rem}
+.src-opt:hover{color:var(--gold-p)}
+.src-opt.active{background:linear-gradient(135deg,var(--gold-d),var(--gold));color:#080806;font-weight:700}
+.src-lbl{display:block}
+.src-mini{display:block;font-size:.62rem;font-weight:700;letter-spacing:0}
+.src-mini.up{color:var(--red)}
+.src-mini.dn{color:var(--grn)}
+.src-mini.flat{color:inherit;opacity:.7}
+.src-opt.active .src-mini.up{color:#8B1A1A}
+.src-opt.active .src-mini.dn{color:#0F5C30}
+
+/* BUTTONS */
+.bpri{width:100%;padding:.5rem;background:linear-gradient(135deg,var(--gold-d),var(--gold));border:none;border-radius:4px;color:#080806;font-family:'Cinzel',serif;font-size:.6rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.4rem;transition:.2s}
+.bpri:hover{opacity:.88;transform:translateY(-1px)}
+.bpri:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.bsec{background:rgba(255,215,0,.07);border:1px solid var(--bor);color:var(--gold-p);padding:.35rem .8rem;border-radius:4px;font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:.2s}
+.bsec:hover{background:rgba(255,215,0,.14)}
+.bsm{padding:.25rem .55rem;font-size:.55rem}
+.spin{display:inline-block;animation:rot .7s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+
+/* DATE */
+.drow{display:flex;flex-direction:column;gap:.35rem}
+.dlbl{font-family:'Cinzel',serif;font-size:.58rem;color:var(--t2);letter-spacing:1px}
+.dpick{background:var(--bg4);border:1px solid var(--bor);border-radius:4px;color:var(--t1);padding:.38rem .6rem;font-family:'Cinzel',serif;font-size:.75rem;width:100%;color-scheme:dark}
+.dpick:focus{outline:none;border-color:var(--gold)}
+.dprev{font-family:'Cinzel',serif;font-size:.75rem;color:var(--gold);text-align:center;padding:.3rem;margin-top:.15rem;background:rgba(255,215,0,.04);border-radius:4px;letter-spacing:1px}
+.dbtns{display:flex;gap:.35rem;margin-top:.25rem}
+
+/* OVERRIDE */
+.ovrow{display:flex;flex-direction:column;gap:.3rem;margin-bottom:.55rem}
+.ovrow label{font-family:'Cinzel',serif;font-size:.58rem;color:var(--t2);letter-spacing:1px}
+.inp{background:var(--bg4);border:1px solid var(--bor);border-radius:4px;color:var(--t1);padding:.38rem .55rem;font-family:'Cinzel',serif;font-size:.78rem;width:100%;transition:.2s}
+.inp:focus{outline:none;border-color:var(--gold)}
+.inp-sm{padding:.25rem .45rem;font-size:.68rem}
+
+/* ══════════════════════════════════════════
+   CANVAS TOOLBAR — with inline font controls
+══════════════════════════════════════════ */
+.cwa{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+
+/* Toolbar wraps to 2 rows if needed on narrow screens */
+.cwbar{
+  min-height:44px;height:auto;
+  background:var(--bg1);
+  border-bottom:1px solid var(--borf);
+  display:flex;align-items:center;
+  justify-content:space-between;
+  padding:0 .85rem;
+  flex-wrap:wrap;
+  gap:.4rem;
+}
+.cwlbl{font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:3px;color:var(--t2);text-transform:uppercase;flex-shrink:0}
+.cwacts{display:flex;align-items:center;gap:.35rem;flex-wrap:wrap;padding:.35rem 0}
+
+/* Regular tool buttons */
+.btool{background:transparent;border:1px solid var(--borf);color:var(--t2);padding:.22rem .5rem;border-radius:4px;font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:1px;cursor:pointer;transition:.2s;white-space:nowrap}
+.btool:hover{border-color:var(--bor);color:var(--gold-p)}
+.btool.on{border-color:var(--gold);color:var(--gold)}
+
+/* ── FONT SIZE STEPPER ── */
+.fsz-group{
+  display:flex;align-items:center;
+  border:1px solid var(--bor);
+  border-radius:4px;
+  overflow:hidden;
+  background:rgba(255,215,0,.04);
+}
+.fsz-btn{
+  width:26px;height:26px;
+  background:transparent;
+  border:none;
+  color:var(--gold);
+  font-size:1rem;
+  font-weight:700;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .15s;
+  flex-shrink:0;
+  line-height:1;
+  padding:0;
+}
+.fsz-btn:hover{background:rgba(255,215,0,.14)}
+.fsz-btn:active{background:rgba(255,215,0,.22);transform:scale(.9)}
+.fsz-val{
+  font-family:'Cinzel',serif;
+  font-size:.62rem;
+  color:var(--gold-p);
+  min-width:30px;
+  text-align:center;
+  border-left:1px solid var(--borf);
+  border-right:1px solid var(--borf);
+  padding:0 .2rem;
+  letter-spacing:.5px;
+  user-select:none;
+}
+
+/* ── FONT PICKER DROPDOWN ── */
+.font-pick{
+  background:rgba(255,215,0,.04);
+  border:1px solid var(--bor);
+  border-radius:4px;
+  color:var(--gold-p);
+  padding:.22rem .4rem;
+  font-size:.6rem;
+  cursor:pointer;
+  height:26px;
+  max-width:130px;
+  letter-spacing:.5px;
+}
+
+/* ── COLOUR SWATCH ── */
+.col-swatch{
+  width:26px;height:26px;
+  border:1px solid var(--bor);
+  border-radius:4px;
+  cursor:pointer;
+  padding:2px;
+  background:none;
+  flex-shrink:0;
+}
+
+/* ── TOOLBAR DIVIDER ── */
+.tb-div{width:1px;height:18px;background:var(--borf);flex-shrink:0}
+
+/* CANVAS AREA */
+.parea{flex:1;overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:1rem;background:repeating-conic-gradient(#0F0E09 0% 25%,#0A0906 0% 50%) 0 0/18px 18px;min-height:200px}
+.pph{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.7rem;width:100%;height:100%;min-height:240px;color:var(--t3)}
+.pph-ico{font-size:3rem;animation:pulse 2.5s ease-in-out infinite}
+.pph-txt{font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:3px;text-transform:uppercase}
+.pcont{position:relative;display:none;box-shadow:0 0 0 1px rgba(255,215,0,.1),0 10px 40px #000a;user-select:none;max-width:100%}
+.pbg{display:block;max-width:100%;max-height:calc(100vh - var(--hh) - 120px);width:auto;height:auto}
+
+/* TEXT OVERLAYS */
+.ov{position:absolute;transform:translate(-50%,-50%);cursor:move;display:flex;align-items:center;gap:2px;z-index:10;touch-action:none}
+.ov:hover .dh,.ov.active .dh{opacity:1}
+.ov.dragging{z-index:20}
+.ov-txt{
+  font-family:'Cinzel',serif;
+  font-size:18px;
+  font-weight:700;
+  color:#FFD700;
+  text-shadow:1px 1px 4px rgba(0,0,0,.95);
+  white-space:nowrap;
+  line-height:1;
+  letter-spacing:1px;
+  transition:font-size .12s,color .2s;
+}
+.dh{width:15px;height:15px;background:rgba(255,215,0,.2);border:1px solid rgba(255,215,0,.45);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:.55rem;color:var(--gold);opacity:0;transition:.2s;cursor:grab;flex-shrink:0}
+.dh:active{cursor:grabbing}
+
+/* SPARKLINE OVERLAY */
+.ov-spark{
+  position:absolute;
+  transform:translate(-50%,-50%);
+  cursor:move;
+  z-index:10;
+  touch-action:none;
+  border:1px dashed transparent;
+  transition:border-color .2s;
+  min-width:40px;min-height:16px;
+}
+.ov-spark:hover,.ov-spark.active{border-color:rgba(255,215,0,.35)}
+.ov-spark.dragging{z-index:20}
+.ov-spark svg{width:100%;height:100%;display:block;overflow:visible}
+.spark-dh{position:absolute;top:-8px;right:-8px;opacity:0;transition:.2s}
+.ov-spark:hover .spark-dh,.ov-spark.active .spark-dh{opacity:1}
+
+/* GUIDES */
+.guides{position:absolute;inset:0;pointer-events:none;z-index:5;display:none}
+.gh{position:absolute;left:0;right:0;height:0;border-top:1px dashed rgba(255,80,80,.5)}
+.gv{position:absolute;top:0;bottom:0;width:0;border-left:1px dashed rgba(80,180,255,.4)}
+
+/* DOWNLOAD BAR */
+.dlbar{height:56px;background:var(--bg1);border-top:1px solid var(--bor);display:none;align-items:center;justify-content:space-between;padding:0 1.1rem;gap:.6rem}
+.dlinfo{font-family:'Cinzel',serif;font-size:.58rem;color:var(--t2);letter-spacing:1px}
+.dlbtns{display:flex;gap:.6rem;align-items:center}
+.bdl{background:linear-gradient(120deg,var(--gold-d) 0%,var(--gold) 50%,var(--gold-d) 100%);background-size:200% 100%;border:none;color:#080806;padding:.44rem 1.2rem;border-radius:4px;font-family:'Cinzel',serif;font-size:.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;gap:.35rem;transition:background-position .4s,transform .15s;animation:shim 3s ease-in-out infinite}
+.bdl:hover{background-position:right center;transform:translateY(-1px)}
+.bdl:disabled{opacity:.4;cursor:not-allowed;animation:none}
+@keyframes shim{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.bdl-share{
+  background:rgba(255,215,0,.08);
+  background-size:auto;
+  color:var(--gold-p);
+  border:1px solid var(--bor);
+  animation:none;
+  box-shadow:none;
+}
+.bdl-share:hover{background:rgba(255,215,0,.16);background-position:0 0;transform:translateY(-1px)}
+.sfmt{background:var(--bg4);border:1px solid var(--bor);color:var(--t1);padding:.38rem .4rem;border-radius:4px;font-family:'Cinzel',serif;font-size:.62rem;cursor:pointer}
+
+/* SETTINGS PANEL */
+.sbg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:none;align-items:flex-start;justify-content:flex-end;backdrop-filter:blur(3px)}
+.sbg.open{display:flex}
+.sp{width:min(390px,100vw);height:100vh;background:var(--bg2);border-left:1px solid var(--bor);overflow-y:auto;box-shadow:-5px 0 28px #000a;animation:sin .28s cubic-bezier(.34,1.56,.64,1)}
+@keyframes sin{from{transform:translateX(45px);opacity:0}to{transform:none;opacity:1}}
+.shdr{height:56px;border-bottom:1px solid var(--bor);display:flex;align-items:center;justify-content:space-between;padding:0 1.1rem;position:sticky;top:0;background:var(--bg2);z-index:1}
+.shdr h2{font-family:'Cinzel',serif;font-size:.75rem;letter-spacing:4px;color:var(--gold);text-transform:uppercase}
+.sbody{padding:1rem;display:flex;flex-direction:column;gap:1.1rem}
+.ssec h4{font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:2.5px;color:var(--gold-b);text-transform:uppercase;margin-bottom:.6rem;padding-bottom:.35rem;border-bottom:1px solid var(--borf)}
+.srow{display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem}
+.srow label{font-family:'Cinzel',serif;font-size:.6rem;color:var(--t2);min-width:82px;letter-spacing:.5px}
+.srow span{font-family:'Cinzel',serif;font-size:.6rem;color:var(--gold);min-width:40px}
+.rinp{flex:1;-webkit-appearance:none;height:3px;background:var(--bg4);border-radius:2px;outline:none}
+.rinp::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;background:var(--gold);border-radius:50%;cursor:pointer}
+.cinp{width:34px;height:25px;border:1px solid var(--bor);border-radius:3px;background:none;cursor:pointer;padding:2px}
+.sinp{flex:1;background:var(--bg4);border:1px solid var(--bor);color:var(--t1);padding:.32rem .45rem;border-radius:4px;font-family:'Cinzel',serif;font-size:.64rem}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:.45rem;margin-bottom:.6rem}
+.pgi label{display:block;font-family:'Cinzel',serif;font-size:.57rem;color:var(--t2);letter-spacing:1px;margin-bottom:.22rem}
+
+/* SHADOW CUSTOM SUB-PANEL */
+.shsub{
+  padding:.6rem;
+  margin-bottom:.6rem;
+  background:rgba(255,215,0,.035);
+  border:1px solid var(--borf);
+  border-radius:6px;
+}
+.shsub .srow:last-child{margin-bottom:0}
+.bico-eyedrop{
+  width:30px;height:25px;
+  font-size:.85rem;
+  padding:0;
+  flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* CONN DOT */
+.cdot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:.3rem;background:var(--t3)}
+.cdot.ok{background:var(--grn);box-shadow:0 0 5px var(--grn)}
+.cdot.err{background:var(--red)}
+
+/* RATE FLASH */
+@keyframes rf{0%{color:#FFE55C;text-shadow:0 0 16px var(--gold)}100%{color:var(--gold)}}
+.rf{animation:rf .8s ease}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .app{flex-direction:column;height:auto;overflow:auto}
+  .sb{width:100%;min-width:unset;border-right:none;border-bottom:1px solid var(--bor);flex-direction:row;flex-wrap:wrap;gap:.55rem;padding:.6rem;overflow-y:unset}
+  .sb .pnl{flex:1 1 calc(50% - .275rem);min-width:135px}
+  .parea{padding:.6rem;min-height:55vw}
+  .pbg{max-height:70vw}
+  /* FIX: removed !important override that broke font size controls on mobile */
+  .dh{opacity:.7}
+  .dlbar{flex-direction:column;height:auto;padding:.6rem;gap:.35rem}
+  .dlbtns{width:100%}
+  .bdl{flex:1;justify-content:center}
+  .sp{width:100vw}
+  .cwbar{padding:.4rem .6rem}
+  .font-pick{max-width:100px}
+}
+@media(max-width:400px){.sb .pnl{flex:1 1 100%}}
+
+/* HEADER LOGO */
+.hlogo{
+  height:34px;width:34px;
+  border-radius:50%;
+  object-fit:cover;
+  border:1px solid rgba(255,215,0,.3);
+  flex-shrink:0;
+  background:#0A0A08;
+}
+
+/* OK / LOCK BUTTON */
+.btn-ok{
+  display:flex;align-items:center;gap:.3rem;
+  background:rgba(255,215,0,.07);
+  border:1px solid var(--bor);
+  color:var(--gold-p);
+  padding:.22rem .55rem;
+  border-radius:4px;
+  font-family:'Cinzel',serif;
+  font-size:.58rem;
+  letter-spacing:1.5px;
+  cursor:pointer;
+  transition:.2s;
+  white-space:nowrap;
+}
+.btn-ok:hover{background:rgba(255,215,0,.14)}
+.btn-ok.locked{
+  background:rgba(78,201,122,.12);
+  border-color:rgba(78,201,122,.5);
+  color:var(--grn);
+}
+/* Overlays show green outline when locked */
+.ov[style*="not-allowed"] .ov-txt,
+.ov-custom[style*="not-allowed"] .ov-txt{ opacity:.85 }
+.lock-badge{
+  display:none;
+  position:absolute;top:6px;right:6px;
+  background:rgba(78,201,122,.2);
+  border:1px solid rgba(78,201,122,.5);
+  color:var(--grn);
+  font-family:'Cinzel',serif;
+  font-size:.52rem;
+  padding:.15rem .4rem;
+  border-radius:3px;
+  letter-spacing:1px;
+  pointer-events:none;
+  z-index:50;
+}
+.lock-badge.on{display:block}
+
+/* ADD TEXT BUTTON */
+.btn-addtxt{
+  display:flex;align-items:center;gap:.25rem;
+  background:rgba(255,215,0,.07);
+  border:1px solid var(--bor);
+  color:var(--gold-p);
+  padding:.22rem .55rem;
+  border-radius:4px;
+  font-family:'Cinzel',serif;
+  font-size:.58rem;
+  letter-spacing:1px;
+  cursor:pointer;
+  transition:.2s;
+  white-space:nowrap;
+}
+.btn-addtxt:hover{background:rgba(255,215,0,.14)}
+
+/* ADD TEXT PANEL */
+.addtxt-panel{
+  background:var(--bg1);
+  border-bottom:1px solid var(--bor);
+  padding:.55rem .85rem;
+  display:none;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:.5rem;
+  animation:slideDown .2s ease;
+}
+.addtxt-panel.open{display:flex}
+@keyframes slideDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.addtxt-inp{
+  flex:1;min-width:120px;
+  background:var(--bg4);
+  border:1px solid var(--bor);
+  border-radius:4px;
+  color:var(--t1);
+  padding:.32rem .6rem;
+  font-family:'Cinzel',serif;
+  font-size:.75rem;
+  letter-spacing:1px;
+}
+.addtxt-inp:focus{outline:none;border-color:var(--gold)}
+.addtxt-col{
+  width:28px;height:28px;
+  border:1px solid var(--bor);
+  border-radius:4px;
+  background:none;
+  cursor:pointer;
+  padding:2px;
+  flex-shrink:0;
+}
+.addtxt-sz{
+  width:52px;
+  background:var(--bg4);
+  border:1px solid var(--bor);
+  border-radius:4px;
+  color:var(--t1);
+  padding:.3rem .4rem;
+  font-family:'Cinzel',serif;
+  font-size:.72rem;
+  text-align:center;
+}
+.btn-addnow{
+  background:linear-gradient(135deg,var(--gold-d),var(--gold));
+  border:none;
+  border-radius:4px;
+  color:#080806;
+  padding:.3rem .7rem;
+  font-family:'Cinzel',serif;
+  font-size:.6rem;
+  font-weight:700;
+  letter-spacing:1.5px;
+  cursor:pointer;
+  white-space:nowrap;
+}
+
+/* CUSTOM OVERLAY (extra added texts) */
+.ov-custom{
+  position:absolute;
+  transform:translate(-50%,-50%);
+  cursor:move;
+  display:flex;
+  align-items:center;
+  gap:2px;
+  z-index:12;
+  touch-action:none;
+}
+.ov-custom:hover .ov-del{opacity:1}
+.ov-custom:hover .dh{opacity:1}
+.ov-custom.dragging{z-index:22}
+.ov-del{
+  width:14px;height:14px;
+  background:rgba(232,64,64,.7);
+  border:1px solid rgba(232,64,64,.9);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.5rem;
+  color:#fff;
+  opacity:0;
+  transition:.15s;
+  cursor:pointer;
+  flex-shrink:0;
+  line-height:1;
+}
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="ld">
+  <div>
+    <span class="ld-ico">◈</span>
+    <div class="ld-t">GOLD POSTER STUDIO</div>
+    <div class="ld-s">LOADING…</div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="hdr">
+  <div class="hl">
+    <img src="data:image/jpeg;base64,/9j/4QE0RXhpZgAATU0AKgAAAAgACAESAAMAAAABAAEAAAEaAAUAAAABAAAAbgEbAAUAAAABAAAAdgEoAAMAAAABAAIAAAExAAIAAABEAAAAfgE7AAIAAAAOAAAAwgITAAMAAAABAAEAAIdpAAQAAAABAAAA0AAAAAAAAABIAAAAAQAAAEgAAAABQ2FudmEgKFJlbmRlcmVyKSBkb2M9REFIS3ZfMVRrM0UgdXNlcj1VQURSbGNPS29yWSBicmFuZD1CQURSbFllcGE2UQBBa2FzaCBIYXJpZGFzAAAHkAAABwAAAAQwMjIxkQEABwAAAAQBAgMAoAAABwAAAAQwMTAwoAEAAwAAAAEAAQAAoAIABAAAAAEAAAJmoAMABAAAAAEAAAIhpAYAAwAAAAEAAAAAAAAAAAAA/+EKm2h0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8APD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNi4wLjAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczpkYz0iaHR0cDovL3B1cmwub3JnL2RjL2VsZW1lbnRzLzEuMS8iIHhtbG5zOnhtcD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLyIgeG1wOkNyZWF0b3JUb29sPSJDYW52YSAoUmVuZGVyZXIpIGRvYz1EQUhLdl8xVGszRSB1c2VyPVVBRFJsY09Lb3JZIGJyYW5kPUJBRFJsWWVwYTZRIj4gPGRjOnRpdGxlPiA8cmRmOkFsdD4gPHJkZjpsaSB4bWw6bGFuZz0ieC1kZWZhdWx0Ij41MDAyOTc4ODAxNyA1ODg2OTE4NTgwMiAtIDM8L3JkZjpsaT4gPC9yZGY6QWx0PiA8L2RjOnRpdGxlPiA8ZGM6Y3JlYXRvcj4gPHJkZjpTZXE+IDxyZGY6bGk+QWthc2ggSGFyaWRhczwvcmRmOmxpPiA8L3JkZjpTZXE+IDwvZGM6Y3JlYXRvcj4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPD94cGFja2V0IGVuZD0idyI/PgD/4gIoSUNDX1BST0ZJTEUAAQEAAAIYYXBwbAQAAABtbnRyUkdCIFhZWiAH5gABAAEAAAAAAABhY3NwQVBQTAAAAABBUFBMAAAAAAAAAAAAAAAAAAAAAAAA9tYAAQAAAADTLWFwcGwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAApkZXNjAAAA/AAAADBjcHJ0AAABLAAAAFB3dHB0AAABfAAAABRyWFlaAAABkAAAABRnWFlaAAABpAAAABRiWFlaAAABuAAAABRyVFJDAAABzAAAACBjaGFkAAAB7AAAACxiVFJDAAABzAAAACBnVFJDAAABzAAAACBtbHVjAAAAAAAAAAEAAAAMZW5VUwAAABQAAAAcAEQAaQBzAHAAbABhAHkAIABQADNtbHVjAAAAAAAAAAEAAAAMZW5VUwAAADQAAAAcAEMAbwBwAHkAcgBpAGcAaAB0ACAAQQBwAHAAbABlACAASQBuAGMALgAsACAAMgAwADIAMlhZWiAAAAAAAAD21QABAAAAANMsWFlaIAAAAAAAAIPfAAA9v////7tYWVogAAAAAAAASr8AALE3AAAKuVhZWiAAAAAAAAAoOAAAEQsAAMi5cGFyYQAAAAAAAwAAAAJmZgAA8qcAAA1ZAAAT0AAACltzZjMyAAAAAAABDEIAAAXe///zJgAAB5MAAP2Q///7ov///aMAAAPcAADAbv/bAIQAAQEBAQEBAgEBAgMCAgIDBAMDAwMEBQQEBAQEBQYFBQUFBQUGBgYGBgYGBgcHBwcHBwgICAgICQkJCQkJCQkJCQEBAQECAgIEAgIECQYFBgkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJ/90ABAAn/8AAEQgCIQJmAwEiAAIRAQMRAf/EAaIAAAEFAQEBAQEBAAAAAAAAAAABAgMEBQYHCAkKCxAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6AQADAQEBAQEBAQEBAAAAAAAAAQIDBAUGBwgJCgsRAAIBAgQEAwQHBQQEAAECdwABAgMRBAUhMQYSQVEHYXETIjKBCBRCkaGxwQkjM1LwFWJy0QoWJDThJfEXGBkaJicoKSo1Njc4OTpDREVGR0hJSlNUVVZXWFlaY2RlZmdoaWpzdHV2d3h5eoKDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uLj5OXm5+jp6vLz9PX29/j5+v/aAAwDAQACEQMRAD8A/wA/+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP//Q/wA/+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP//R/wA/+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP//S/wA/+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP//T/wA/+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP//U/wA/+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP//V/wA/+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP//W/wA/+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP//X/wA/+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP//Q/wA/+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP//R/wA/+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP//S/wA/+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACipYYmnlWFOrEAV6v8aPg14s+B/i5fCPi2JkkltobuF2QoJIpkDqVB7DOK5p4ulGrGhJ+872Xpa/3XRpGlJxc0tEeR0UUV0mYUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAf/0/8AP/ooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiipIYjNKsKk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tXx3RXv5b4dZFhJc9DCQT78qb+93PAx/F+aYpctevJrtfT7i9f6lqGqTm61KZ55G5LyMWJ/E1Roor7OMUlZHzjYUUUUwCiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAClHFJRQB6V4E+MfxW+GF5Hf/AA78R6loksRyrWN1LBj8EYD9K/SX4V/8Fxv+Clfwm0+PStM+Ic2q28WAqatBFe8DsTIuf1r8kKK+fzjhTK8wXLjsPCp/iin+aO/B5picPrQqOPo7H9E+h/8AByj+2fbRqnibw94c1Q8b28h4Cx/7ZtwPYV6nZ/8AByv8R57cJr/wx0qSQgbmhu51GfYHtX8wtFfnmK+j/wAHVneWAivTmj+TR9NQ8Rc7p/DiH+D/AEP6RPEP/BxT8R7t2fRPhtpUZYf8tbqc4/75rwfxx/wXz/a41+3a38HaTofh/cMb44DcMB7eaf6V+GdFb4LwH4RoNOGBjp3u/wAG2h1/EbO6itLEv5WX5I+4vil/wUf/AG0fi8JIPFXjzUYraUYa3smFpEe33YttfGWq65rGu3H2vWrqW7l/vzO0jfmxNZVFfo2VZBgcDDkwVGNNf3Ypfkj5XF5hXrvmrzcvV3CiiivWOMKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//Q/wA/+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP//R/wA/+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP//S/wA/+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP//T/wA/+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP//U/wA/+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP//V/wA/+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP//W/wA/+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP//X/wA/+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP//Q/wA/+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP//R/wA/+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP//Z" class="hlogo" alt="EverGLO" />
+    <span class="htxt">EverGLO <span>Poster</span> Studio</span>
+  </div>
+  <div class="hr">
+    <div class="rpill">
+      <span class="rplbl">22K · 1g</span>
+      <span class="rpval" id="hdrR">—</span>
+    </div>
+    <button class="bico" id="btnSet" title="Settings">⚙</button>
+  </div>
+</header>
+
+<div id="toast"></div>
+
+<!-- APP -->
+<div class="app">
+
+  <!-- ════ SIDEBAR ════ -->
+  <aside class="sb">
+
+    <!-- Upload: label wraps entire zone — one tap opens native picker on iOS/Android -->
+    <div class="pnl">
+      <div class="ptit">↑ Template</div>
+      <label class="dz" id="dz">
+        <input type="file" id="fIn" class="dz-inp" accept="image/*">
+        <div class="dzi" id="dzi">
+          <div class="dzico">⬡</div>
+          <div class="dztxt">Tap to choose photo</div>
+          <div class="dzsub">or drag &amp; drop on desktop</div>
+          <span class="bbrw">Choose / Camera</span>
+        </div>
+      </label>
+      <img id="thumb" class="thumb" alt=""/>
+    </div>
+
+    <!-- Gold Rate -->
+    <div class="pnl">
+      <div class="ptit">◈ Gold Rates</div>
+      <div class="rrows">
+        <div class="rrow">
+          <span class="rlbl">1 Gram · 22K</span>
+          <span class="rval" id="d1g">—</span>
+        </div>
+        <div class="rdiv"></div>
+        <div class="rrow">
+          <span class="rlbl">8 Gram · 22K</span>
+          <span class="rval" id="d8g">—</span>
+        </div>
+        <div class="rmeta" id="rmeta"><span class="cdot"></span>Not fetched</div>
+        <div class="rerr" id="rerr"></div>
+      </div>
+
+      <!-- Source Toggle -->
+      <div class="src-tog" id="srcTog">
+        <button class="src-opt active" data-src="akgsma" id="srcBtnAkg">
+          <span class="src-lbl">AKGSMA</span>
+          <span class="src-mini" id="srcMiniAkg">—</span>
+        </button>
+        <button class="src-opt" data-src="bullions" id="srcBtnBul">
+          <span class="src-lbl">Bullions</span>
+          <span class="src-mini" id="srcMiniBul">—</span>
+        </button>
+      </div>
+      <svg id="bulTrendSvg" viewBox="0 0 100 28" style="width:100%;height:30px;display:none;margin-top:.2rem"></svg>
+
+      <!-- Bullions Kerala — full status panel (own 7-day daily graph, separate
+           from the poster's AKGSMA-based history above) -->
+      <div id="bulPanel" style="display:none;margin-top:.6rem;padding-top:.6rem;border-top:1px dashed var(--borf)">
+        <div class="ptit" style="margin-bottom:.5rem">◈ Kerala · Bullions Live</div>
+        <div id="bulIndicator" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
+          <span id="bulArrow" style="font-size:1.1rem">—</span>
+          <span id="bulBigRate" style="font-family:'Cinzel',serif;font-size:1.05rem;color:var(--gold);font-weight:700">—</span>
+          <span id="bulPct" style="font-family:'Cinzel',serif;font-size:.65rem"></span>
+        </div>
+        <div class="rrows" style="margin-bottom:.5rem">
+          <div class="rrow"><span class="rlbl">1 Gram · 22K</span><span class="rval" id="bul1g">—</span></div>
+          <div class="rdiv"></div>
+          <div class="rrow"><span class="rlbl">8 Gram · 22K</span><span class="rval" id="bul8g">—</span></div>
+          <div class="rdiv"></div>
+          <div class="rrow"><span class="rlbl">10 Gram · 22K</span><span class="rval" id="bul10g">—</span></div>
+        </div>
+        <div class="dlbl" style="margin-bottom:.3rem">7-Day Kerala Trend</div>
+        <svg id="bul7daySvg" viewBox="0 0 100 30" style="width:100%;height:34px"></svg>
+      </div>
+
+      <button class="bpri" id="btnFetch">
+        <span id="fsp" style="display:none" class="spin">◌</span>Fetch Live Rate
+      </button>
+      <div id="ast" class="astatus"></div>
+      <button class="bsec bsm" id="btnCopyTxt" style="width:100%;margin-top:.4rem" title="Copy a ready-to-paste WhatsApp caption with today's rate">📋 Copy Rate as Text</button>
+
+      <!-- Change vs Yesterday -->
+      <div class="chg-row">
+        <span class="chg-lbl">vs Yesterday</span>
+        <span class="chg-val flat" id="chgVal">—</span>
+      </div>
+      <div class="chg-actions">
+        <button class="bsec bsm" id="btnEditYest" title="Manually correct the rate logged for the day before the poster date">✎ Edit Prev-Day Rate</button>
+      </div>
+
+      <!-- Quick toggles + independent size/colour -->
+      <div class="qtog-row">
+        <label class="qtog">
+          <input type="checkbox" id="qChgOn" checked>
+          <span class="qtog-sw"></span>
+          <span class="qtog-lbl">▲▼ Change Indicator</span>
+        </label>
+        <div class="qsc-row">
+          <div class="fsz-group" title="Change indicator font size">
+            <button class="fsz-btn" id="btnChgSz-" title="Decrease">−</button>
+            <span class="fsz-val" id="qChgSzVal">14</span>
+            <button class="fsz-btn" id="btnChgSz+" title="Increase">+</button>
+          </div>
+          <input type="color" class="col-swatch" id="qChgCol" value="#FFD700" title="Change indicator colour (flat state)">
+        </div>
+
+        <label class="qtog">
+          <input type="checkbox" id="qSparkOn" checked>
+          <span class="qtog-sw"></span>
+          <span class="qtog-lbl">📈 7-Day Graph</span>
+        </label>
+        <div class="qsc-row">
+          <div class="fsz-group" title="Graph line/dot size">
+            <button class="fsz-btn" id="btnSparkSz-" title="Decrease">−</button>
+            <span class="fsz-val" id="qSparkSzVal">14</span>
+            <button class="fsz-btn" id="btnSparkSz+" title="Increase">+</button>
+          </div>
+          <input type="color" class="col-swatch" id="qSparkCol" value="#FFD700" title="Graph line/dot colour">
+        </div>
+      </div>
+    </div>
+
+    <!-- Date -->
+    <div class="pnl">
+      <div class="ptit">◷ Date</div>
+      <div class="drow">
+        <span class="dlbl">Display Date</span>
+        <input type="date" id="dIn" class="dpick"/>
+        <div class="dprev" id="dprev">—</div>
+        <div class="dbtns">
+          <button class="bsec bsm" id="btnToday">Today</button>
+          <button class="bsec bsm" id="btnYest">Yesterday</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Override -->
+    <div class="pnl">
+      <div class="ptit">✎ Override</div>
+      <div class="ovrow">
+        <label>1g Rate (₹)</label>
+        <input type="number" id="ovInp" class="inp" placeholder="e.g. 7050"/>
+      </div>
+      <button class="bsec bsm" id="btnOv">Apply</button>
+    </div>
+
+  </aside>
+
+  <!-- ════ CANVAS ════ -->
+  <section class="cwa">
+
+    <!-- ── TOOLBAR with inline font controls ── -->
+    <div class="cwbar">
+      <span class="cwlbl">Preview</span>
+
+      <div class="cwacts">
+
+        <!-- Reset & Guides -->
+        <button class="btool" id="btnRst" title="Reset text positions">↺ Reset</button>
+        <button class="btool" id="btnGd"  title="Toggle guide lines">⊞ Guides</button>
+
+        <div class="tb-div"></div>
+
+        <!-- ── FONT SIZE STEPPER ── -->
+        <div class="fsz-group" title="Adjust font size">
+          <button class="fsz-btn" id="btnFsz-" title="Decrease font size">−</button>
+          <span class="fsz-val" id="fszVal">14</span>
+          <button class="fsz-btn" id="btnFsz+" title="Increase font size">+</button>
+        </div>
+
+        <div class="tb-div"></div>
+
+        <!-- ── COLOUR PICKER ── -->
+        <input type="color" class="col-swatch" id="tbColor" value="#FFD700" title="Text colour"/>
+
+        <div class="tb-div"></div>
+
+        <!-- ── FONT FAMILY PICKER ── -->
+        <select class="font-pick" id="tbFont" title="Choose font">
+          <option value="'Cinzel',serif">Cinzel (Default)</option>
+          <option value="'Playfair Display',serif">Playfair Display</option>
+          <option value="'Cinzel Decorative',serif">Cinzel Decorative</option>
+          <option value="'Cormorant Garamond',serif">Cormorant Garamond</option>
+          <option value="'IM Fell English',serif">IM Fell English</option>
+          <option value="'Bebas Neue',sans-serif">Bebas Neue</option>
+          <option value="'Tiro Malayalam',serif">Tiro Malayalam</option>
+          <option value="Georgia,serif">Georgia</option>
+          <option value="'Times New Roman',serif">Times New Roman</option>
+        </select>
+
+        <div class="tb-div"></div>
+
+        <!-- ── SHADOW ON/OFF TOGGLE ── -->
+        <label class="qtog qtog-tb" title="Toggle text shadow on/off">
+          <input type="checkbox" id="tbShadowOn" checked>
+          <span class="qtog-sw"></span>
+          <span class="qtog-lbl">Shadow</span>
+        </label>
+
+        <div class="tb-div"></div>
+
+        <!-- ── OK / LOCK BUTTON ── -->
+        <button class="btn-ok" id="btnOk" title="Lock current positions & style for download">
+          ⊙ OK
+        </button>
+
+        <div class="tb-div"></div>
+
+        <!-- ── ADD TEXT BUTTON ── -->
+        <button class="btn-addtxt" id="btnAddTxt" title="Add custom text to poster">
+          ＋ Text
+        </button>
+
+      </div>
+    </div>
+
+    <!-- ── ADD TEXT PANEL (slides open below toolbar) ── -->
+    <div class="addtxt-panel" id="addtxtPanel">
+      <input  class="addtxt-inp" id="atInp"  type="text"   placeholder="Type your text here…" />
+      <input  class="addtxt-sz"  id="atSz"   type="number" value="14" min="6" max="80" title="Font size" />
+      <input  class="addtxt-col" id="atCol"  type="color"  value="#FFD700" title="Text colour" />
+      <button class="btn-addnow" id="btnAtAdd">Add ＋</button>
+    </div>
+
+    <!-- POSTER AREA -->
+    <div class="parea">
+      <div class="pph" id="pph">
+        <div class="pph-ico">⬡</div>
+        <div class="pph-txt">Upload template to begin</div>
+      </div>
+
+      <div class="pcont" id="pc">
+        <img id="pbg" class="pbg" draggable="false" alt="poster"/>
+        <div class="lock-badge" id="lockBadge">⊙ LOCKED</div>
+
+        <!-- Overlays — calibrated to Everglo 1080×1920 -->
+        <div class="ov" id="ov1g" data-key="g1" style="top:58.13%;left:59.9%">
+          <div class="ov-txt" id="t1g">—</div>
+          <div class="dh">⠿</div>
+        </div>
+        <div class="ov" id="ov8g" data-key="g8" style="top:63.70%;left:59.9%">
+          <div class="ov-txt" id="t8g">—</div>
+          <div class="dh">⠿</div>
+        </div>
+        <div class="ov" id="ovDt" data-key="dt" style="top:67.76%;left:45.0%">
+          <div class="ov-txt" id="tDt">—</div>
+          <div class="dh">⠿</div>
+        </div>
+        <div class="ov" id="ovChg" data-key="chg" style="top:53.0%;left:59.9%">
+          <div class="ov-txt" id="tChg">—</div>
+          <div class="dh">⠿</div>
+        </div>
+        <div class="ov-spark" id="ovSpark" data-key="spark" style="top:48.0%;left:59.9%;width:26%;height:8%">
+          <svg id="sparkSvg" viewBox="0 0 100 30" preserveAspectRatio="none"></svg>
+          <div class="dh spark-dh">⠿</div>
+        </div>
+
+        <!-- Guide lines -->
+        <div class="guides" id="guides">
+          <div class="gh" style="top:58.13%"></div>
+          <div class="gh" style="top:63.70%"></div>
+          <div class="gh" style="top:67.76%"></div>
+          <div class="gh" style="top:53.0%"></div>
+          <div class="gh" style="top:48.0%"></div>
+          <div class="gv" style="left:59.9%"></div>
+          <div class="gv" style="left:45.0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Download Bar -->
+    <div class="dlbar" id="dlbar">
+      <div class="dlinfo" id="dlinfo">Ready to export</div>
+      <div class="dlbtns">
+        <button class="bdl" id="btnDl">⬇ Download Poster</button>
+        <button class="bdl bdl-share" id="btnShare" title="Share directly to WhatsApp and other apps (mobile)">📤 Share</button>
+        <select class="sfmt" id="sfmt">
+          <option value="png">PNG</option>
+          <option value="jpeg">JPG</option>
+        </select>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ════ SETTINGS PANEL ════ -->
+<div class="sbg" id="sbg">
+  <div class="sp">
+    <div class="shdr">
+      <h2>⚙ Settings</h2>
+      <button class="bico" id="btnCS">✕</button>
+    </div>
+    <div class="sbody">
+
+      <div class="ssec">
+        <h4>Text Style</h4>
+        <div class="srow">
+          <label>Font Size</label>
+          <input type="range" class="rinp" id="sSize" min="8" max="72" value="14">
+          <span id="sSzV">14px</span>
+        </div>
+        <div class="srow">
+          <label>Color</label>
+          <input type="color" class="cinp" id="sCol" value="#FFD700">
+          <span id="sColV">#FFD700</span>
+        </div>
+        <div class="srow">
+          <label>Shadow</label>
+          <select class="sinp" id="sSh">
+            <option value="dark">Dark Shadow</option>
+            <option value="glow">Gold Glow</option>
+            <option value="custom">Custom…</option>
+            <option value="none">None</option>
+          </select>
+        </div>
+        <div class="shsub" id="shSub" style="display:none">
+          <div class="srow">
+            <label>Shadow Color</label>
+            <input type="color" class="cinp" id="sShCol" value="#000000">
+            <button class="bsec bsm bico-eyedrop" id="btnEyedrop" title="Pick shadow colour from anywhere on screen (e.g. an uploaded reference image)">💧</button>
+          </div>
+          <div class="srow">
+            <label>Blur</label>
+            <input type="range" id="sShBlur" min="0" max="40" step="1" value="4" class="rinp">
+            <span id="sShBlurV">4px</span>
+          </div>
+          <div class="srow">
+            <label>Opacity</label>
+            <input type="range" id="sShOp" min="0" max="100" step="1" value="90" class="rinp">
+            <span id="sShOpV">90%</span>
+          </div>
+        </div>
+        <div class="srow">
+          <label>Weight</label>
+          <select class="sinp" id="sWt">
+            <option value="700">Bold (700)</option>
+            <option value="900">Black (900)</option>
+            <option value="600">SemiBold (600)</option>
+            <option value="400">Regular (400)</option>
+          </select>
+        </div>
+        <div class="srow">
+          <label>Letter Spacing</label>
+          <input type="range" class="rinp" id="sLS" min="0" max="8" value="1" step="0.5">
+          <span id="sLSV">1px</span>
+        </div>
+        <div class="srow">
+          <label>Number Format</label>
+          <select class="sinp" id="sFm">
+            <option value="comma">₹ 7,050</option>
+            <option value="rupee">₹ 7,050</option>
+            <option value="plain">7050</option>
+          </select>
+        </div>
+        <div class="srow">
+          <label>Date Format</label>
+          <select class="sinp" id="sDf">
+            <option value="ddmmyyyy">27-05-2026</option>
+            <option value="ddmonyyyy">27-May-2026</option>
+            <option value="ddmmyy">27/05/26</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="ssec">
+        <h4>Change Indicator</h4>
+        <div class="srow">
+          <label>Show ▲▼ Indicator</label>
+          <input type="checkbox" id="sChgOn" checked style="width:auto">
+        </div>
+        <div class="srow">
+          <label>Show 7-Day Graph</label>
+          <input type="checkbox" id="sSparkOn" checked style="width:auto">
+        </div>
+        <p style="font-family:'Cinzel',serif;font-size:.56rem;color:var(--t3);margin-top:.5rem;letter-spacing:.5px;line-height:1.5">
+          ▲▼ compares the rate logged for the poster's Display Date against the day before it.
+          The 7-day graph plots your own logged rates — it only fills in for days you've actually
+          used this app, since akgsma.com has no rate history to pull from.
+        </p>
+      </div>
+
+      <div class="ssec">
+        <h4>Text Positions (%)</h4>
+        <p style="font-family:'Cinzel',serif;font-size:.58rem;color:var(--t2);margin-bottom:.6rem;letter-spacing:.5px">Default positions pixel-calibrated for Everglo 1080×1920 template.</p>
+        <div class="pgrid">
+          <div class="pgi"><label>1g · Top %</label><input type="number" class="inp inp-sm" id="p1T" step="0.1"></div>
+          <div class="pgi"><label>1g · Left %</label><input type="number" class="inp inp-sm" id="p1L" step="0.1"></div>
+          <div class="pgi"><label>8g · Top %</label><input type="number" class="inp inp-sm" id="p8T" step="0.1"></div>
+          <div class="pgi"><label>8g · Left %</label><input type="number" class="inp inp-sm" id="p8L" step="0.1"></div>
+          <div class="pgi"><label>Date · Top %</label><input type="number" class="inp inp-sm" id="pDT" step="0.1"></div>
+          <div class="pgi"><label>Date · Left %</label><input type="number" class="inp inp-sm" id="pDL" step="0.1"></div>
+          <div class="pgi"><label>Change · Top %</label><input type="number" class="inp inp-sm" id="pCT" step="0.1"></div>
+          <div class="pgi"><label>Change · Left %</label><input type="number" class="inp inp-sm" id="pCL" step="0.1"></div>
+          <div class="pgi"><label>Graph · Top %</label><input type="number" class="inp inp-sm" id="pST" step="0.1"></div>
+          <div class="pgi"><label>Graph · Left %</label><input type="number" class="inp inp-sm" id="pSL" step="0.1"></div>
+          <div class="pgi"><label>Graph · Width %</label><input type="number" class="inp inp-sm" id="pSW" step="0.5"></div>
+          <div class="pgi"><label>Graph · Height %</label><input type="number" class="inp inp-sm" id="pSH" step="0.5"></div>
+        </div>
+        <button class="bsec bsm" id="btnAP">Apply Positions</button>
+      </div>
+
+      <div class="ssec">
+        <h4>Rate Source Info</h4>
+        <p style="font-size:.67rem;color:var(--t2);line-height:1.65;font-family:'Cormorant Garamond',serif">
+          Fetches <strong style="color:var(--gold-p)">XAU/USD</strong> from metals.live +
+          <strong style="color:var(--gold-p)">USD/INR</strong> from open.er-api.com.<br>
+          Formula: <code style="color:var(--gold);font-size:.64rem">(XAU ÷ 31.1035) × INR × (22÷24)</code><br>
+          If APIs fail, use <strong style="color:var(--gold-p)">Override</strong> panel to enter today's rate manually.
+        </p>
+      </div>
+
+      <div class="ssec">
+        <h4>Save Settings</h4>
+        <div style="display:flex;gap:.4rem;flex-wrap:wrap">
+          <button class="bsec bsm" id="btnSv">💾 Save</button>
+          <button class="bsec bsm" id="btnLd">↺ Load</button>
+          <button class="bsec bsm" id="btnCl">✕ Clear</button>
+        </div>
+        <p style="font-size:.58rem;color:var(--t3);margin-top:.4rem;font-family:'Cinzel',serif;letter-spacing:.5px">Saved to localStorage on this device</p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<canvas id="xc" style="display:none"></canvas>
+
+<script>
+/* ════════════════════════════════════════════════════════
+   GOLD POSTER STUDIO
+   Calibrated: Everglo 1080×1920 px template
+   Bugs fixed:
+   - Removed !important mobile font override
+   - Fixed sidebar ₹ display vs overlay format mismatch
+   - Fixed ctx.letterSpacing (not supported in Safari → fallback)
+   - Fixed AbortSignal.timeout() Safari compatibility
+   - Toolbar font controls wired to same S.cfg state as Settings panel
+════════════════════════════════════════════════════════ */
+'use strict';
+
+const g = id => document.getElementById(id);
+
+// ── State ──────────────────────────────────────────────
+const S = {
+  img: null,
+  r1: null, r8: null,
+  date: new Date(),
+  source: 'akgsma',     // 'akgsma' | 'bullions' — active rate source toggle
+  _fetching: false,     // reentrancy guard for fetchLive()
+  lastRates: { akgsma: null, bullions: null }, // {r,prev,chgPct} per source — feeds mini badges
+  locked: null,        // snapshot of pos+cfg+customTexts for download
+  customTexts: [],     // array of {id,text,top,left,size,color,font,weight}
+  chgOn: true,         // show change indicator overlay
+  chgSize: 14,          // independent font size for ▲▼ indicator
+  chgColor: '#FFD700',  // base colour (flat state) — up/down still auto red/green
+  sparkOn: true,        // show 7-day sparkline overlay
+  sparkSize: 14,        // controls line thickness + dot radius scale
+  sparkColor: '#FFD700',// base line/dot colour — last-point still auto red/green
+  pos: {
+    g1: { top: 58.13, left: 59.9 },
+    g8: { top: 63.70, left: 59.9 },
+    dt: { top: 67.76, left: 45.0 },
+    chg:{ top: 53.0,  left: 59.9 },
+    spark:{ top: 48.0, left: 59.9, w: 26, h: 8 }  // w/h in % of poster width/height
+  },
+  cfg: {
+    size:   14,
+    color:  '#FFD700',
+    font:   "'Cinzel',serif",
+    shadow: 'dark',
+    lastShadow: 'dark', // remembers last non-'none' shadow style for the on/off toggle
+    shadowColor: '#000000',  // custom shadow colour (used when shadow === 'custom')
+    shadowBlur:  4,           // custom shadow blur radius in px
+    shadowOpacity: 90,        // custom shadow opacity 0-100
+    weight: '700',
+    ls:     1,
+    fmt:    'comma',
+    dfmt:   'ddmmyyyy'
+  },
+  guides: false
+};
+
+// ── Toast ──────────────────────────────────────────────
+let _tt;
+function toast(msg, type='', ms=3000) {
+  const el = g('toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + type;
+  clearTimeout(_tt);
+  _tt = setTimeout(() => el.classList.remove('show'), ms);
+}
+
+// ── Format helpers ─────────────────────────────────────
+function fmtNum(v) {
+  if (v === null || v === undefined) return '—';
+  const n = Math.round(Number(v));
+  switch (S.cfg.fmt) {
+    case 'plain': return String(n);
+    default:      return '₹ ' + n.toLocaleString('en-IN');
+  }
+}
+
+function fmtDate(d) {
+  const dd  = String(d.getDate()).padStart(2,'0');
+  const mm  = String(d.getMonth()+1).padStart(2,'0');
+  const yy  = d.getFullYear();
+  const yys = String(yy).slice(2);
+  const mn  = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()];
+  switch (S.cfg.dfmt) {
+    case 'ddmonyyyy': return `${dd}-${mn}-${yy}`;
+    case 'ddmmyy':    return `${dd}/${mm}/${yys}`;
+    default:          return `${dd}-${mm}-${yy}`;
+  }
+}
+
+// ── Rate history log (date-keyed) ──────────────────────
+// Stored as { "YYYY-MM-DD": rate, ... } in localStorage.
+// This is the single source of truth for both the change indicator
+// and the 7-day sparkline. Built from days you actually use the app —
+// akgsma.com itself has no historical archive to pull from.
+const HIST_KEY = 'gps_rate_history';
+
+function dateKey(d) {
+  const dt = d instanceof Date ? d : new Date(d);
+  return dt.toISOString().slice(0,10);
+}
+
+function loadHistory() {
+  try {
+    const raw = localStorage.getItem(HIST_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch(e) { return {}; }
+}
+
+function saveHistory(hist) {
+  try { localStorage.setItem(HIST_KEY, JSON.stringify(hist)); } catch(e) {}
+}
+
+// Records a rate for a given date. Never overwrites an existing entry
+// for a *different* date than today unless explicitly told to (manual edit).
+function logRate(date, rate, force=false) {
+  if (rate == null) return;
+  const hist = loadHistory();
+  const key = dateKey(date);
+  if (force || hist[key] == null) {
+    hist[key] = Math.round(rate);
+    saveHistory(hist);
+  }
+}
+
+// Looks up the rate logged for exactly (date - 1 day). Returns null if absent.
+function getPrevDayRate(date) {
+  const d = date instanceof Date ? new Date(date) : new Date(date);
+  d.setDate(d.getDate() - 1);
+  const hist = loadHistory();
+  const v = hist[dateKey(d)];
+  return (v != null) ? v : null;
+}
+
+// Last 7 calendar days ending on `date`, oldest→newest. Missing days = null.
+function getLast7(date) {
+  const hist = loadHistory();
+  const out = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(date);
+    d.setDate(d.getDate() - i);
+    const k = dateKey(d);
+    out.push({ date: k, v: hist[k] != null ? hist[k] : null });
+  }
+  return out;
+}
+
+// ── Bullions-only 7-day history ─────────────────────────
+// Kept fully separate from the poster's HIST_KEY above — switching the
+// source toggle must never mix AKGSMA and Bullions numbers into one log.
+const BUL_HIST_KEY = 'gps_bullions_history';
+
+function loadBulHistory() {
+  try { const raw = localStorage.getItem(BUL_HIST_KEY); return raw ? JSON.parse(raw) : {}; }
+  catch(e) { return {}; }
+}
+function saveBulHistory(hist) {
+  try { localStorage.setItem(BUL_HIST_KEY, JSON.stringify(hist)); } catch(e) {}
+}
+// Today's entry always refreshes (rates move during the day); past days lock
+// once logged so a stray re-fetch can't silently rewrite history.
+function logBulRate(date, rate) {
+  if (rate == null) return;
+  const hist = loadBulHistory();
+  const key = dateKey(date);
+  const isToday = key === dateKey(new Date());
+  if (isToday || hist[key] == null) {
+    hist[key] = Math.round(rate);
+    saveBulHistory(hist);
+  }
+}
+function getBulLast7() {
+  const hist = loadBulHistory();
+  const out = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const k = dateKey(d);
+    out.push({ date: k, v: hist[k] != null ? hist[k] : null });
+  }
+  return out;
+}
+
+// ── Live sparkline preview (SVG, mirrors the canvas export logic) ─────
+function refreshSparkline() {
+  const svg = g('sparkSvg');
+  if (!svg) return;
+  const data = getLast7(S.date);
+  svg.innerHTML = '';
+  g('ovSpark').style.display = S.sparkOn ? '' : 'none';
+  if (!S.sparkOn) return;
+
+  const pts = data.map(d => d.v).filter(v => v != null);
+  if (pts.length < 2) {
+    // Not enough data yet — show a flat placeholder line so the box isn't empty
+    const ns = 'http://www.w3.org/2000/svg';
+    const line = document.createElementNS(ns,'line');
+    line.setAttribute('x1','2'); line.setAttribute('y1','15');
+    line.setAttribute('x2','98'); line.setAttribute('y2','15');
+    line.setAttribute('stroke','rgba(255,215,0,.25)');
+    line.setAttribute('stroke-width','1.5');
+    line.setAttribute('stroke-dasharray','3,3');
+    svg.appendChild(line);
+    return;
+  }
+
+  const vMin = Math.min(...pts), vMax = Math.max(...pts);
+  const range = (vMax - vMin) || 1;
+  const n = data.length;
+  const stepX = 100 / (n - 1);
+  const PAD = 3;
+
+  const coords = data.map((d, i) => {
+    if (d.v == null) return null;
+    const x = i * stepX;
+    const y = PAD + (30 - PAD*2) * (1 - (d.v - vMin) / range);
+    return { x, y };
+  });
+
+  const ns = 'http://www.w3.org/2000/svg';
+  let pathD = '';
+  let pendingMove = true;
+  coords.forEach(p => {
+    if (!p) { pendingMove = true; return; }
+    pathD += pendingMove ? `M${p.x},${p.y} ` : `L${p.x},${p.y} `;
+    pendingMove = false;
+  });
+  const szScale = S.sparkSize / 14; // 14px = baseline 1x thickness/dot scale
+  const path = document.createElementNS(ns,'path');
+  path.setAttribute('d', pathD.trim());
+  path.setAttribute('fill','none');
+  path.setAttribute('stroke', S.sparkColor);
+  path.setAttribute('stroke-width', Math.max(1, 2 * szScale));
+  path.setAttribute('stroke-linejoin','round');
+  path.setAttribute('stroke-linecap','round');
+  svg.appendChild(path);
+
+  coords.forEach((p, i) => {
+    if (!p) return;
+    const isLast = i === n - 1;
+    let dotColor = S.sparkColor;
+    if (isLast && coords[i-1]) {
+      dotColor = (data[i].v > data[i-1].v) ? '#E84040'
+               : (data[i].v < data[i-1].v) ? '#4EC97A'
+               : S.sparkColor;
+    }
+    const c = document.createElementNS(ns,'circle');
+    c.setAttribute('cx', p.x); c.setAttribute('cy', p.y);
+    c.setAttribute('r', Math.max(1, (isLast ? 3 : 2) * szScale));
+    c.setAttribute('fill', dotColor);
+    svg.appendChild(c);
+  });
+}
+
+// ── Change indicator (▲/▼ vs the day before S.date) ────
+// Returns {text, cls} where cls is 'up'|'dn'|'flat'
+function fmtChg() {
+  const prev = getPrevDayRate(S.date);
+  if (S.r1 == null || prev == null) return { text: '—', cls: 'flat' };
+  const diff = Math.round(S.r1) - Math.round(prev);
+  if (diff === 0) return { text: '● No Change', cls: 'flat' };
+  const sign = diff > 0 ? '+' : '−';
+  const abs  = Math.abs(diff).toLocaleString('en-IN');
+  if (diff > 0) return { text: `▲ ${sign}₹${abs}`, cls: 'up' };
+  return { text: `▼ ${sign}₹${abs}`, cls: 'dn' };
+}
+
+// ── Apply text style to all overlays ──────────────────
+// Converts '#RRGGBB' + 0-1 alpha to an 'rgba(...)' string.
+function hexToRgba(hex, alpha) {
+  const h = hex.replace('#','');
+  const r = parseInt(h.substring(0,2), 16);
+  const g2 = parseInt(h.substring(2,4), 16);
+  const b = parseInt(h.substring(4,6), 16);
+  return `rgba(${r},${g2},${b},${alpha})`;
+}
+
+function applyStyle() {
+  let sh = '';
+  if (S.cfg.shadow === 'dark') sh = '1px 1px 4px rgba(0,0,0,.95),0 0 10px rgba(0,0,0,.6)';
+  if (S.cfg.shadow === 'glow') sh = '0 0 10px rgba(255,215,0,.85),0 0 24px rgba(255,215,0,.4)';
+  if (S.cfg.shadow === 'custom') {
+    const a = (S.cfg.shadowOpacity != null ? S.cfg.shadowOpacity : 90) / 100;
+    const c = hexToRgba(S.cfg.shadowColor || '#000000', a);
+    const b = S.cfg.shadowBlur != null ? S.cfg.shadowBlur : 4;
+    const a2 = Math.round(a * 0.6 * 100) / 100;
+    sh = `1px 1px ${b}px ${c}, 0 0 ${b*2.5}px ${hexToRgba(S.cfg.shadowColor || '#000000', a2)}`;
+  }
+
+  ['t1g','t8g','tDt'].forEach(id => {
+    const el = g(id);
+    el.style.fontFamily   = S.cfg.font;
+    el.style.fontSize     = S.cfg.size + 'px';
+    el.style.color        = S.cfg.color;
+    el.style.fontWeight   = S.cfg.weight;
+    el.style.textShadow   = sh;
+    el.style.letterSpacing = S.cfg.ls + 'px';
+  });
+
+  // Change indicator — own size; colour follows up/down, falls back to chgColor when flat
+  const chg = fmtChg();
+  const tChgEl = g('tChg');
+  tChgEl.style.fontFamily    = S.cfg.font;
+  tChgEl.style.fontSize      = S.chgSize + 'px';
+  tChgEl.style.fontWeight    = '900';
+  tChgEl.style.textShadow    = sh;
+  tChgEl.style.letterSpacing = S.cfg.ls + 'px';
+  tChgEl.style.color         = chg.cls === 'up' ? 'var(--red)' : chg.cls === 'dn' ? 'var(--grn)' : S.chgColor;
+
+  g('ovChg').style.display = S.chgOn ? '' : 'none';
+
+  // Keep toolbar controls in sync with state
+  g('fszVal').textContent = S.cfg.size;
+  g('tbColor').value      = S.cfg.color;
+  g('tbFont').value       = S.cfg.font;
+  g('tbShadowOn').checked = (S.cfg.shadow !== 'none');
+  // Settings panel sync
+  g('sSize').value        = S.cfg.size;
+  g('sSzV').textContent   = S.cfg.size + 'px';
+  g('sCol').value         = S.cfg.color;
+  g('sColV').textContent  = S.cfg.color;
+  g('sChgOn').checked     = S.chgOn;
+  g('sSparkOn').checked   = S.sparkOn;
+  // Sidebar quick-toggle sync
+  g('qChgOn').checked     = S.chgOn;
+  g('qSparkOn').checked   = S.sparkOn;
+  // Independent size/colour controls sync
+  g('qChgSzVal').textContent = S.chgSize;
+  g('qChgCol').value          = S.chgColor;
+  g('qSparkSzVal').textContent = S.sparkSize;
+  g('qSparkCol').value          = S.sparkColor;
+  refreshSparkline();
+}
+
+// ── Update overlay text content ────────────────────────
+function updateOvs() {
+  g('t1g').textContent = fmtNum(S.r1);
+  g('t8g').textContent = fmtNum(S.r8);
+  g('tDt').textContent = fmtDate(S.date);
+  const chg = fmtChg();
+  g('tChg').textContent = chg.text;
+  // Sidebar change display
+  const cv = g('chgVal');
+  cv.textContent = chg.text;
+  cv.className = 'chg-val ' + chg.cls;
+  applyStyle();
+}
+
+// ── Set rates ──────────────────────────────────────────
+function setRates(r1, r8, flash=true) {
+  S.r1 = r1;
+  S.r8 = (r8 != null) ? r8 : Math.round(r1 * 8);
+  // Sidebar always shows ₹ regardless of overlay format
+  g('d1g').textContent = '₹ ' + Math.round(S.r1).toLocaleString('en-IN');
+  g('d8g').textContent = '₹ ' + Math.round(S.r8).toLocaleString('en-IN');
+  g('hdrR').textContent = '₹ ' + Math.round(S.r1).toLocaleString('en-IN');
+  if (flash) {
+    ['d1g','d8g','hdrR'].forEach(id => {
+      const el = g(id);
+      el.classList.remove('rf');
+      void el.offsetWidth; // force reflow
+      el.classList.add('rf');
+    });
+  }
+  updateOvs();
+  if (S.img) g('dlinfo').textContent = fmtDate(S.date) + ' · ₹' + Math.round(S.r1).toLocaleString('en-IN');
+
+  // Log this rate under S.date in the history map (used by change indicator + sparkline).
+  // The CURRENT day's entry always refreshes to the latest fetched/overridden rate —
+  // gold rates move during the day and the graph should track that. Past days stay
+  // locked once logged, so a stray fetch can't silently overwrite a corrected value;
+  // those are only changed via the explicit "Edit Prev-Day Rate" (force) action.
+  const isToday = dateKey(S.date) === dateKey(new Date());
+  logRate(S.date, r1, isToday);
+  refreshSparkline();
+}
+
+// ── Date ───────────────────────────────────────────────
+function setDate(d) {
+  S.date = d;
+  g('dIn').value = d.toISOString().slice(0,10);
+  g('dprev').textContent = fmtDate(d);
+  updateOvs();
+  refreshSparkline();
+}
+g('dIn').addEventListener('change', () => setDate(new Date(g('dIn').value + 'T00:00:00')));
+g('btnToday').addEventListener('click', () => { setDate(new Date()); toast('Date → Today','ok'); });
+g('btnYest').addEventListener('click', () => {
+  const y = new Date(); y.setDate(y.getDate()-1); setDate(y); toast('Date → Yesterday','ok');
+});
+
+// ── Image upload ───────────────────────────────────────
+function loadImg(file) {
+  if (!file) return;
+  if (!file.type.startsWith('image/')) {
+    toast('Please choose an image file (JPG, PNG, etc.)','err'); return;
+  }
+  const r = new FileReader();
+  r.onerror = () => toast('Could not read file — try again','err');
+  r.onload = e => {
+    S.img = e.target.result;
+    // Load into a temp Image to confirm it renders
+    const testImg = new Image();
+    testImg.onerror = () => toast('Image could not be loaded','err');
+    testImg.onload = () => {
+      g('pbg').src   = e.target.result;
+      g('pph').style.display   = 'none';
+      g('pc').style.display    = 'inline-block';
+      g('dlbar').style.display = 'flex';
+      g('thumb').src           = e.target.result;
+      g('thumb').style.display = 'block';
+      // Update the zone content (it's inside a label, innerHTML update is fine)
+      const kb = (file.size / 1024).toFixed(0);
+      g('dzi').innerHTML =
+        `<div class="dzico" style="color:var(--grn)">✓</div>` +
+        `<div class="dztxt">${file.name}</div>` +
+        `<div class="dzsub">${kb} KB · tap to change</div>`;
+      toast('Template loaded!','ok');
+      updateOvs();
+      // Persist the template so it's there next time the app opens — saves a
+      // re-upload every single session, since the template rarely changes.
+      try {
+        localStorage.setItem('gps_template_img', e.target.result);
+      } catch (err) {
+        // Quota exceeded (large image) — not fatal, just won't persist this session
+        console.warn('Template too large to persist locally:', err);
+      }
+    };
+    testImg.src = e.target.result;
+  };
+  r.readAsDataURL(file);
+}
+// File input change — fires on both mobile and desktop
+g('fIn').addEventListener('change', e => {
+  if (e.target.files && e.target.files[0]) loadImg(e.target.files[0]);
+  // Reset value so same file can be re-selected
+  e.target.value = '';
+});
+
+// Drag & Drop (desktop) — attach to the label element
+g('dz').addEventListener('dragenter', e => { e.preventDefault(); g('dz').classList.add('over'); });
+g('dz').addEventListener('dragover',  e => { e.preventDefault(); g('dz').classList.add('over'); });
+g('dz').addEventListener('dragleave', e => { if (!g('dz').contains(e.relatedTarget)) g('dz').classList.remove('over'); });
+g('dz').addEventListener('drop', e => {
+  e.preventDefault();
+  g('dz').classList.remove('over');
+  const file = e.dataTransfer.files[0];
+  if (file) loadImg(file);
+});
+
+// Paste (Ctrl+V / Cmd+V on desktop)
+document.addEventListener('paste', e => {
+  const it = [...e.clipboardData.items].find(i => i.type.startsWith('image/'));
+  if (it) loadImg(it.getAsFile());
+});
+
+// ── ══ TOOLBAR FONT CONTROLS ══ ────────────────────────
+
+// Font size stepper — each click ±1px (hold for repeat)
+function changeFontSize(delta) {
+  const next = Math.max(6, Math.min(80, S.cfg.size + delta));
+  if (next === S.cfg.size) return;
+  S.cfg.size = next;
+  applyStyle();
+}
+
+// Long-press repeat
+function makeRepeater(btn, fn) {
+  let timer, interval;
+  const start = () => {
+    fn();
+    timer = setTimeout(() => { interval = setInterval(fn, 80); }, 400);
+  };
+  const stop = () => { clearTimeout(timer); clearInterval(interval); };
+  btn.addEventListener('mousedown',  start);
+  btn.addEventListener('touchstart', e => { e.preventDefault(); start(); }, {passive:false});
+  btn.addEventListener('mouseup',   stop);
+  btn.addEventListener('mouseleave', stop);
+  btn.addEventListener('touchend',  stop);
+}
+makeRepeater(g('btnFsz-'), () => changeFontSize(-1));
+makeRepeater(g('btnFsz+'), () => changeFontSize(+1));
+
+// Toolbar colour picker
+g('tbColor').addEventListener('input', () => {
+  S.cfg.color = g('tbColor').value;
+  g('sCol').value = S.cfg.color;
+  g('sColV').textContent = S.cfg.color;
+  applyStyle();
+});
+
+// Toolbar font selector
+g('tbFont').addEventListener('change', () => {
+  S.cfg.font = g('tbFont').value;
+  applyStyle();
+});
+
+// ── ══ INDEPENDENT CHANGE-INDICATOR SIZE/COLOUR ══ ─────
+function changeChgSize(delta) {
+  const next = Math.max(6, Math.min(80, S.chgSize + delta));
+  if (next === S.chgSize) return;
+  S.chgSize = next;
+  applyStyle();
+}
+makeRepeater(g('btnChgSz-'), () => changeChgSize(-1));
+makeRepeater(g('btnChgSz+'), () => changeChgSize(+1));
+g('qChgCol').addEventListener('input', () => {
+  S.chgColor = g('qChgCol').value;
+  applyStyle();
+});
+
+// ── ══ INDEPENDENT SPARKLINE SIZE/COLOUR ══ ────────────
+function changeSparkSize(delta) {
+  const next = Math.max(6, Math.min(80, S.sparkSize + delta));
+  if (next === S.sparkSize) return;
+  S.sparkSize = next;
+  refreshSparkline();
+  g('qSparkSzVal').textContent = S.sparkSize;
+}
+makeRepeater(g('btnSparkSz-'), () => changeSparkSize(-1));
+makeRepeater(g('btnSparkSz+'), () => changeSparkSize(+1));
+g('qSparkCol').addEventListener('input', () => {
+  S.sparkColor = g('qSparkCol').value;
+  refreshSparkline();
+});
+
+// ── Fetch live gold rate ───────────────────────────────
+// ── Parse akgsma.com HTML for 22K 1gm rate ────────────────
+// Page format: "22K916 (1gm) - ₹ 14510"
+function parseAkgsma(rawText) {
+  const text = normBullionsHtml(rawText); // same nbsp/₹-entity cleanup applies here too
+  const patterns = [
+    /22[Kk]\d*\s*\(1\s*gm?\)\s*[-\u2013]\s*(?:Rs\.?|[\u20B9])?\s*([\d,]+)/i,
+    /22K916[^<]{0,50}(?:Rs\.?|[\u20B9])\s*([\d,]+)/i,
+    /22[Kk][^<]{0,30}(?:Rs\.?|[\u20B9])\s*([\d,]+)/i,
+  ];
+  for (const p of patterns) {
+    const m = text.match(p);
+    if (m) {
+      const v = parseInt(m[1].replace(/,/g,''), 10);
+      if (v > 4000 && v < 25000) return v;
+    }
+  }
+  return null;
+}
+
+// Normalizes common HTML entities that break the bullions regexes below —
+// &nbsp; doesn't match \s, and &#8377;/&#x20B9; are entity-encoded ₹ that can
+// get mistaken for digits if left raw. Run on text before any bullions parse.
+function normBullionsHtml(text) {
+  return text
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&#8377;|&#x20B9;/gi, '₹')
+    .replace(/&amp;/gi, '&');
+}
+
+// ── Parse bullions.co.in Kerala page for 22K 1gm rate ─────
+// Table row format: "Gold 22 Karat (Rs ₹) | 13,175 | 131,753 | ..."
+// First numeric column after the label is the 1-gram rate.
+function parseBullions(rawText) {
+  const text = normBullionsHtml(rawText);
+  const patterns = [
+    /Gold\s*22\s*Karat[^<|]{0,40}(?:Rs\.?|₹)?\)?\s*[<|\s]*\D{0,20}?([\d,]{4,7})/i,
+    /22\s*Karat[^<|]{0,60}?([\d,]{4,7})/i,
+  ];
+  for (const p of patterns) {
+    const m = text.match(p);
+    if (m) {
+      const v = parseInt(m[1].replace(/,/g,''), 10);
+      if (v > 4000 && v < 25000) return v;
+    }
+  }
+  return null;
+}
+
+// ── Parse bullions.co.in "Price Change" table for mini trend ─────
+// Row: "Gold 24 Karat (Rs ₹/10gm) | 143,730.00 | +0.00% | 147,710.00 | -2.69% | 156,630.00 | -8.24% | 97,420.00 | +47.54%"
+// Cols after label = [today(current pull-not-here), 1d-ago,chg, 1wk-ago,chg, 1mo-ago,chg, 1yr-ago,chg]
+// Converts 24K/10gm → 22K/1gm (×22/24 /10) to match the app's rate scale.
+function parseBullionsTrend(rawText) {
+  const text = normBullionsHtml(rawText);
+  const m = text.match(/Gold\s*24\s*Karat[^<|]{0,30}10\s*gm\)?[^0-9]{0,20}([\d,]+\.?\d*)[^0-9]{1,15}[+\-][\d.]+%[^0-9]{1,15}([\d,]+\.?\d*)[^0-9]{1,15}[+\-][\d.]+%[^0-9]{1,15}([\d,]+\.?\d*)[^0-9]{1,15}[+\-][\d.]+%[^0-9]{1,15}([\d,]+\.?\d*)/i);
+  if (!m) return null;
+  const toG22 = v => Math.round((parseFloat(v.replace(/,/g,'')) / 10) * (22/24));
+  const oneD  = toG22(m[1]);
+  const oneW  = toG22(m[2]);
+  const oneM  = toG22(m[3]);
+  const oneY  = toG22(m[4]);
+  if ([oneD,oneW,oneM,oneY].some(v => !(v > 4000 && v < 25000))) return null;
+  // oldest → newest for left-to-right graph
+  return [
+    { label:'1y',  v: oneY },
+    { label:'1mo', v: oneM },
+    { label:'1wk', v: oneW },
+    { label:'1d',  v: oneD },
+  ];
+}
+
+
+// Safe fetch with timeout (Safari-compatible)
+function fetchT(url, ms) {
+  return new Promise((res, rej) => {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => { ctrl.abort(); rej(new Error('Timeout')); }, ms);
+    fetch(url, { signal: ctrl.signal })
+      .then(r  => { clearTimeout(t); res(r); })
+      .catch(e => { clearTimeout(t); rej(e); });
+  });
+}
+
+async function fetchLive() {
+  if (S._fetching) return; // reentrancy guard — block overlapping calls from
+                            // manual click + toggle click + 5-min auto-interval
+  S._fetching = true;
+  g('btnFetch').disabled = true;
+  g('fsp').style.display = 'inline-block';
+  g('ast').style.display = 'none';
+  g('rerr').style.display = 'none';
+  toast('Fetching gold rate…','',15000);
+
+  try {
+
+  let r22 = null, source = '', trend = null;
+
+  // ═══════════════════════════════════════════════════
+  // PRIMARY: chosen source (akgsma.com / bullions.co.in) via CORS proxies
+  // ═══════════════════════════════════════════════════
+  const targetUrl   = S.source === 'bullions'
+    ? 'https://bullions.co.in/location/kerala/'
+    : 'https://akgsma.com/';
+  const parseFn      = S.source === 'bullions' ? parseBullions : parseAkgsma;
+  const sourceLabel  = S.source === 'bullions' ? 'bullions.co.in' : 'akgsma.com';
+  const ENC = encodeURIComponent(targetUrl);
+  const proxies = [
+    // Attempt direct (works if target has CORS headers)
+    { url: targetUrl, extract: async r => r.ok ? r.text() : null },
+    // allorigins — returns JSON {contents:"..."}
+    { url: `https://api.allorigins.win/get?url=${ENC}`, extract: async r => {
+        if (!r.ok) return null;
+        try { const d = await r.json(); return d.contents || null; } catch(e) { return null; }
+    }},
+    // allorigins raw — returns raw HTML
+    { url: `https://api.allorigins.win/raw?url=${ENC}`, extract: async r => r.ok ? r.text() : null },
+    // corsproxy.io — API changed to require ?url= param (bare ?ENC now 403s)
+    { url: `https://corsproxy.io/?url=${ENC}`, extract: async r => r.ok ? r.text() : null },
+    // codetabs
+    { url: `https://api.codetabs.com/v1/proxy?quest=${ENC}`, extract: async r => r.ok ? r.text() : null },
+    // thingproxy
+    { url: `https://thingproxy.freeboard.io/fetch/${targetUrl}`, extract: async r => r.ok ? r.text() : null },
+  ];
+
+  for (const p of proxies) {
+    if (r22) break;
+    try {
+      const resp = await fetchT(p.url, 9000);
+      const text = await p.extract(resp);
+      if (text) {
+        const v = parseFn(text);
+        if (v) {
+          r22 = v; source = sourceLabel;
+          // Bullions page carries its own 1d/1wk/1mo/1yr trend table — grab it
+          // from the same fetched HTML so the mini graph matches the site exactly.
+          if (S.source === 'bullions') trend = parseBullionsTrend(text);
+        }
+      }
+    } catch(e) { /* try next proxy */ }
+  }
+
+  // ═══════════════════════════════════════════════════
+  // FALLBACK A: fawazahmed0 currency-api (CDN, CORS always on)
+  //   Returns: { "xau": { "inr": XXXXXX } }
+  //   1 XAU (troy oz) = XXXXXX INR  →  22K/g = val/31.1035 * 22/24
+  // ═══════════════════════════════════════════════════
+  if (!r22) {
+    const cdnUrls = [
+      'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/xau.min.json',
+      'https://latest.currency-api.pages.dev/v1/currencies/xau.json',
+    ];
+    for (const u of cdnUrls) {
+      if (r22) break;
+      try {
+        const resp = await fetchT(u, 8000);
+        if (resp.ok) {
+          const d = await resp.json();
+          const inr = d?.xau?.inr || d?.xau?.INR;
+          if (inr && inr > 1000) {
+            r22 = Math.round((inr / 31.1035) * (22/24));
+            source = 'XAU/INR (CDN)';
+          }
+        }
+      } catch(e) {}
+    }
+  }
+
+  // ═══════════════════════════════════════════════════
+  // FALLBACK B: metals.live XAU/USD + exchange rate
+  // ═══════════════════════════════════════════════════
+  if (!r22) {
+    try {
+      let xau = null;
+      // Try metals.live
+      try {
+        const r = await fetchT('https://api.metals.live/v1/spot/gold', 7000);
+        if (r.ok) {
+          const d = await r.json();
+          xau = d.gold ?? d.price ?? (Array.isArray(d) ? d[0]?.price : null);
+        }
+      } catch(e) {}
+      // Try Yahoo Finance GC=F
+      if (!xau) {
+        try {
+          const r = await fetchT('https://query1.finance.yahoo.com/v8/finance/chart/GC%3DF?interval=1d&range=1d', 7000);
+          if (r.ok) {
+            const d = await r.json();
+            xau = d?.chart?.result?.[0]?.meta?.regularMarketPrice;
+          }
+        } catch(e) {}
+      }
+      if (xau && xau > 100) {
+        // Get USD/INR
+        let inr = 84.5;
+        try {
+          const r = await fetchT('https://open.er-api.com/v6/latest/USD', 6000);
+          if (r.ok) { const d = await r.json(); if (d.rates?.INR) inr = d.rates.INR; }
+        } catch(e) {}
+        try {
+          const r = await fetchT('https://api.frankfurter.app/latest?from=USD&to=INR', 6000);
+          if (r.ok) { const d = await r.json(); if (d.rates?.INR) inr = d.rates.INR; }
+        } catch(e) {}
+        r22 = Math.round((xau / 31.1035) * inr * (22/24));
+        source = `XAU/USD calc (${Math.round(xau)})`;
+      }
+    } catch(e) {}
+  }
+
+  // ═══════════════════════════════════════════════════
+  // Result
+  // ═══════════════════════════════════════════════════
+  if (r22 && r22 > 4000) {
+    setRates(r22, Math.round(r22 * 8), true);
+    const now = new Date();
+    g('rmeta').innerHTML = `<span class="cdot ok"></span>Updated ${now.toLocaleTimeString('en-IN')}`;
+    g('ast').textContent = `✓ Source: ${source} · 22K = ₹${r22.toLocaleString('en-IN')}/gm`;
+    g('ast').className = 'astatus ok';
+    g('ast').style.display = 'block';
+    toast(`✓ 22K · ₹${r22.toLocaleString('en-IN')}/gm`,'ok');
+    // Only feed the per-source badge/trend graph when the PRIMARY parser for
+    // the chosen source actually succeeded — a fallback XAU/INR estimate is
+    // a different number on a different scale and would corrupt that source's
+    // own rate history if stored under its key.
+    if (source === sourceLabel) {
+      updateSrcMini(S.source, r22);
+      if (S.source === 'bullions') {
+        renderBullionsTrend(trend, r22);
+        logBulRate(new Date(), r22);
+        updateBulPanel(r22);
+      }
+    }
+  } else {
+    // All sources failed — show prominent manual entry prompt
+    g('rerr').innerHTML =
+      '⚠ Could not fetch automatically.<br>' +
+      `<a href="${targetUrl}" target="_blank" style="color:var(--gold);text-decoration:underline">` +
+      `▸ Check ${sourceLabel} for today's rate</a><br>` +
+      'Then enter below ↓';
+    g('rerr').style.display = 'block';
+    g('rmeta').innerHTML = `<span class="cdot err"></span>All sources failed`;
+    g('ast').style.display = 'none';
+    // Auto-scroll to override panel and focus input
+    setTimeout(() => {
+      const ov = g('ovInp');
+      ov.focus();
+      ov.scrollIntoView({ behavior:'smooth', block:'center' });
+      ov.style.borderColor = 'var(--gold)';
+      ov.style.boxShadow = '0 0 0 2px rgba(255,215,0,.3)';
+    }, 300);
+    toast(`▸ Open ${sourceLabel} to get today's rate`,'err',6000);
+  }
+
+  } finally {
+    // finally guarantees these reset even if something above threw unexpectedly —
+    // previously a stray error left Fetch button stuck disabled forever.
+    g('btnFetch').disabled = false;
+    g('fsp').style.display = 'none';
+    S._fetching = false;
+  }
+}
+g('btnFetch').addEventListener('click', fetchLive);
+
+// ── Source toggle (AKGSMA / Bullions) ──────────────────
+function setSource(src) {
+  S.source = src;
+  g('srcBtnAkg').classList.toggle('active', src === 'akgsma');
+  g('srcBtnBul').classList.toggle('active', src === 'bullions');
+  try { localStorage.setItem('gps_source', src); } catch(e) {}
+  if (src === 'bullions') {
+    try {
+      const saved = JSON.parse(localStorage.getItem('gps_bul_trend') || 'null');
+      if (saved) drawTrendSvg(saved); else g('bulTrendSvg').style.display = 'none';
+    } catch(e) { g('bulTrendSvg').style.display = 'none'; }
+    g('bulPanel').style.display = 'block';
+    // Restore panel from the last logged Bullions rate (today's entry if
+    // present) so switching tabs shows data immediately, no fetch needed.
+    const hist = loadBulHistory();
+    const today = hist[dateKey(new Date())];
+    if (today != null) updateBulPanel(today);
+    else drawBul7daySvg(getBulLast7());
+  } else {
+    g('bulTrendSvg').style.display = 'none';
+    g('bulPanel').style.display = 'none';
+  }
+}
+// Fills the full Bullions Kerala status panel: big rate + red/green arrow +
+// % change vs yesterday's logged Bullions rate, the 1g/8g/10g mini rates,
+// and the 7-day daily trend graph built from the app's own Bullions log
+// (the site itself has no day-by-day series — only 1d/1wk/1mo/1yr snapshots).
+function updateBulPanel(rate) {
+  const hist = loadBulHistory();
+  const todayKey = dateKey(new Date());
+  const yKey = dateKey(new Date(Date.now() - 86400000));
+  const yest = hist[yKey];
+
+  let cls = 'flat', arrow = '—', pctTxt = '';
+  if (yest != null && yest !== rate) {
+    const pct = ((rate - yest) / yest * 100);
+    if (rate > yest) { cls = 'up';  arrow = '▲'; }
+    else              { cls = 'dn';  arrow = '▼'; }
+    pctTxt = `${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%`;
+  }
+  const col = cls === 'up' ? 'var(--red)' : cls === 'dn' ? 'var(--grn)' : 'var(--t2)';
+  g('bulArrow').textContent = arrow;
+  g('bulArrow').style.color = col;
+  g('bulBigRate').textContent = `₹${rate.toLocaleString('en-IN')}`;
+  g('bulPct').textContent = pctTxt;
+  g('bulPct').style.color = col;
+
+  g('bul1g').textContent  = '₹ ' + rate.toLocaleString('en-IN');
+  g('bul8g').textContent  = '₹ ' + Math.round(rate * 8).toLocaleString('en-IN');
+  g('bul10g').textContent = '₹ ' + Math.round(rate * 10).toLocaleString('en-IN');
+
+  drawBul7daySvg(getBulLast7());
+}
+
+// 7-point daily graph with gap handling for days that were never fetched —
+// draws only contiguous segments between known points, like the poster's
+// own sparkline does, so missing days don't fake a flat/zero reading.
+function drawBul7daySvg(data) {
+  const svg = g('bul7daySvg');
+  if (!svg) return;
+  const pts = data.map((d,i) => ({ i, v: d.v })).filter(p => p.v != null);
+  if (pts.length < 2) {
+    svg.innerHTML = `<line x1="2" y1="15" x2="98" y2="15" stroke="rgba(255,215,0,.25)" stroke-width="1.5" stroke-dasharray="3,3"/>`;
+    return;
+  }
+  const vals = pts.map(p => p.v);
+  const lo = Math.min(...vals), hi = Math.max(...vals);
+  const span = (hi - lo) || 1;
+  const W = 100, H = 30, pad = 3;
+  const x = i => pad + (i / 6) * (W - pad * 2);
+  const y = v => H - pad - ((v - lo) / span) * (H - pad * 2);
+  const up = pts[pts.length-1].v >= pts[0].v;
+  const col = up ? 'var(--red)' : 'var(--grn)';
+  let path = pts.map((p,k) => `${k===0?'M':'L'}${x(p.i).toFixed(1)},${y(p.v).toFixed(1)}`).join(' ');
+  let dots = pts.map((p,k) => `<circle cx="${x(p.i).toFixed(1)}" cy="${y(p.v).toFixed(1)}" r="1.6" fill="${k===pts.length-1?col:'var(--t2)'}"/>`).join('');
+  svg.innerHTML = `<path d="${path}" fill="none" stroke="${col}" stroke-width="1.4"/>${dots}`;
+}
+
+// Draws the 4-point (1y→1mo→1wk→1d→today) mini trend line copied straight
+// from bullions.co.in's own "Price Change" table — same shape as the site.
+function renderBullionsTrend(trend, todayRate) {
+  const svg = g('bulTrendSvg');
+  if (!trend) { svg.style.display = 'none'; return; }
+  const pts = [...trend, { label:'today', v: todayRate }];
+  try { localStorage.setItem('gps_bul_trend', JSON.stringify(pts)); } catch(e) {}
+  drawTrendSvg(pts);
+}
+function drawTrendSvg(pts) {
+  const svg = g('bulTrendSvg');
+  const vals = pts.map(p => p.v);
+  const lo = Math.min(...vals), hi = Math.max(...vals);
+  const span = (hi - lo) || 1;
+  const W = 100, H = 28, pad = 3;
+  const x = i => pad + (i / (pts.length - 1)) * (W - pad * 2);
+  const y = v => H - pad - ((v - lo) / span) * (H - pad * 2);
+  const up = pts[pts.length-1].v >= pts[0].v;
+  const col = up ? 'var(--red)' : 'var(--grn)';
+  let path = pts.map((p,i) => `${i===0?'M':'L'}${x(i).toFixed(1)},${y(p.v).toFixed(1)}`).join(' ');
+  let dots = pts.map((p,i) => `<circle cx="${x(i).toFixed(1)}" cy="${y(p.v).toFixed(1)}" r="1.6" fill="${i===pts.length-1?col:'var(--t2)'}"/>`).join('');
+  svg.innerHTML = `<path d="${path}" fill="none" stroke="${col}" stroke-width="1.4"/>${dots}`;
+  svg.style.display = 'block';
+}
+// value per source so the comparison (red=up, green=down) survives reloads.
+function updateSrcMini(src, rate) {
+  const key  = 'gps_lastrate_' + src;
+  const elId = src === 'bullions' ? 'srcMiniBul' : 'srcMiniAkg';
+  const el   = g(elId);
+  let prev = null;
+  try { prev = JSON.parse(localStorage.getItem(key) || 'null'); } catch(e) {}
+
+  let cls = 'flat', arrow = '';
+  if (prev && typeof prev.r === 'number' && prev.r !== rate) {
+    if (rate > prev.r) { cls = 'up'; arrow = '▲'; }
+    else                { cls = 'dn'; arrow = '▼'; }
+  }
+  el.textContent = `${arrow}₹${rate.toLocaleString('en-IN')}`.trim();
+  el.className = 'src-mini ' + cls;
+  S.lastRates[src] = { r: rate, cls };
+  try { localStorage.setItem(key, JSON.stringify({ r: rate, t: Date.now() })); } catch(e) {}
+}
+
+// Manual override
+g('btnOv').addEventListener('click', () => {
+  const v = parseFloat(g('ovInp').value);
+  if (!v || v < 100) { toast('Enter a valid rate','err'); return; }
+  setRates(v, Math.round(v * 8), true);
+  g('ovInp').value = '';
+  g('rerr').style.display = 'none';
+  g('rmeta').innerHTML = `<span class="cdot ok"></span>Manual`;
+  toast('Rate applied: ₹' + v.toLocaleString('en-IN'),'ok');
+});
+
+// ── Draggable overlays ─────────────────────────────────
+function mkDrag(el) {
+  const key = el.dataset.key;
+  let on=false, sx,sy,sl,st;
+
+  const dn = e => {
+    if (!S.img) return;
+    if (S.locked) { toast('Unlock first (click ✓ Locked)','err'); return; }
+    on = true;
+    el.classList.add('dragging','active');
+    const p = e.touches ? e.touches[0] : e;
+    sx=p.clientX; sy=p.clientY;
+    sl=S.pos[key].left; st=S.pos[key].top;
+    e.preventDefault();
+  };
+  const mv = e => {
+    if (!on) return;
+    const p = e.touches ? e.touches[0] : e;
+    const r = g('pc').getBoundingClientRect();
+    S.pos[key] = {
+      left: Math.max(0, Math.min(100, sl + (p.clientX - sx) / r.width  * 100)),
+      top:  Math.max(0, Math.min(100, st + (p.clientY - sy) / r.height * 100))
+    };
+    el.style.left = S.pos[key].left + '%';
+    el.style.top  = S.pos[key].top  + '%';
+    syncPI();
+    e.preventDefault();
+  };
+  const up = () => { on=false; el.classList.remove('dragging','active'); };
+
+  el.addEventListener('mousedown',  dn, {passive:false});
+  el.addEventListener('touchstart', dn, {passive:false});
+  document.addEventListener('mousemove',  mv, {passive:false});
+  document.addEventListener('touchmove',  mv, {passive:false});
+  document.addEventListener('mouseup',  up);
+  document.addEventListener('touchend', up);
+}
+['ov1g','ov8g','ovDt','ovChg'].forEach(id => mkDrag(g(id)));
+
+// Sparkline box has its own drag handler since its pos object also carries w/h
+function mkDragSpark(el) {
+  let on=false, sx,sy,sl,st;
+  const dn = e => {
+    if (!S.img) return;
+    if (S.locked) { toast('Unlock first (click ✓ Locked)','err'); return; }
+    on = true;
+    el.classList.add('dragging','active');
+    const p = e.touches ? e.touches[0] : e;
+    sx=p.clientX; sy=p.clientY;
+    sl=S.pos.spark.left; st=S.pos.spark.top;
+    e.preventDefault();
+  };
+  const mv = e => {
+    if (!on) return;
+    const p = e.touches ? e.touches[0] : e;
+    const r = g('pc').getBoundingClientRect();
+    S.pos.spark.left = Math.max(0, Math.min(100, sl + (p.clientX - sx) / r.width  * 100));
+    S.pos.spark.top  = Math.max(0, Math.min(100, st + (p.clientY - sy) / r.height * 100));
+    el.style.left = S.pos.spark.left + '%';
+    el.style.top  = S.pos.spark.top  + '%';
+    e.preventDefault();
+  };
+  const up = () => { on=false; el.classList.remove('dragging','active'); };
+  el.addEventListener('mousedown',  dn, {passive:false});
+  el.addEventListener('touchstart', dn, {passive:false});
+  document.addEventListener('mousemove',  mv, {passive:false});
+  document.addEventListener('touchmove',  mv, {passive:false});
+  document.addEventListener('mouseup',  up);
+  document.addEventListener('touchend', up);
+}
+mkDragSpark(g('ovSpark'));
+
+function applyPos() {
+  g('ov1g').style.top  = S.pos.g1.top  + '%'; g('ov1g').style.left = S.pos.g1.left + '%';
+  g('ov8g').style.top  = S.pos.g8.top  + '%'; g('ov8g').style.left = S.pos.g8.left + '%';
+  g('ovDt').style.top  = S.pos.dt.top  + '%'; g('ovDt').style.left = S.pos.dt.left + '%';
+  g('ovChg').style.top = S.pos.chg.top + '%'; g('ovChg').style.left = S.pos.chg.left + '%';
+  const sp = g('ovSpark');
+  sp.style.top = S.pos.spark.top + '%'; sp.style.left = S.pos.spark.left + '%';
+  sp.style.width = S.pos.spark.w + '%'; sp.style.height = S.pos.spark.h + '%';
+}
+
+function resetPos() {
+  S.pos = {
+    g1:{top:58.13,left:59.9}, g8:{top:63.70,left:59.9}, dt:{top:67.76,left:45.0},
+    chg:{top:53.0,left:59.9},
+    spark:{top:48.0,left:59.9,w:26,h:8}
+  };
+  applyPos(); syncPI(); toast('Positions reset','ok');
+}
+g('btnRst').addEventListener('click', resetPos);
+
+// ── OK / LOCK ──────────────────────────────────────────
+// Snapshots current positions, style, and custom texts for download.
+// Download always uses this locked snapshot once set.
+function toggleLock() {
+  if (S.locked) {
+    // ── UNLOCK ──
+    S.locked = null;
+    localStorage.removeItem('gps_lock');
+    g('btnOk').classList.remove('locked');
+    g('btnOk').innerHTML = '⊙ OK';
+    g('lockBadge').classList.remove('on');
+    // Re-enable drag handles visibility
+    document.querySelectorAll('.ov,.ov-custom,.ov-spark').forEach(el => {
+      el.style.cursor = 'move';
+      el.style.outline = '';
+    });
+    toast('🔓 Unlocked — drag freely','');
+  } else {
+    // ── LOCK: deep-clone entire current state ──
+    S.locked = {
+      pos:  JSON.parse(JSON.stringify(S.pos)),
+      cfg:  JSON.parse(JSON.stringify(S.cfg)),
+      customTexts: JSON.parse(JSON.stringify(S.customTexts)),
+      r1:   S.r1,
+      r8:   S.r8,
+      prevR1: getPrevDayRate(S.date),
+      last7: getLast7(S.date),
+      chgOn: S.chgOn,
+      chgSize: S.chgSize,
+      chgColor: S.chgColor,
+      sparkOn: S.sparkOn,
+      sparkSize: S.sparkSize,
+      sparkColor: S.sparkColor,
+      date: S.date instanceof Date ? S.date.toISOString() : S.date
+    };
+    // Persist to localStorage so lock survives page refresh
+    try { localStorage.setItem('gps_lock', JSON.stringify(S.locked)); } catch(e) {}
+    g('btnOk').classList.add('locked');
+    g('btnOk').innerHTML = '🔒 Locked';
+    g('lockBadge').classList.add('on');
+    // Show locked state on overlays
+    document.querySelectorAll('.ov,.ov-custom,.ov-spark').forEach(el => {
+      el.style.cursor = 'not-allowed';
+      el.style.outline = '1px solid rgba(78,201,122,.4)';
+    });
+    toast('🔒 Locked! Positions & style saved for download','ok',4000);
+  }
+}
+g('btnOk').addEventListener('click', toggleLock);
+
+// ── ADD TEXT ───────────────────────────────────────────
+let _ctIdx = 0; // unique id counter for custom overlays
+
+function toggleAddPanel() {
+  const panel = g('addtxtPanel');
+  panel.classList.toggle('open');
+  if (panel.classList.contains('open')) {
+    g('atInp').focus();
+    // Sync size+color with current cfg
+    g('atSz').value  = S.cfg.size;
+    g('atCol').value = S.cfg.color;
+  }
+}
+g('btnAddTxt').addEventListener('click', toggleAddPanel);
+
+// Close add-text panel when pressing Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') g('addtxtPanel').classList.remove('open');
+});
+
+// Add text on Enter key in input
+g('atInp').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addCustomText();
+});
+
+g('btnAtAdd').addEventListener('click', addCustomText);
+
+function addCustomText() {
+  const txt = g('atInp').value.trim();
+  if (!txt) { toast('Enter some text first','err'); return; }
+  if (!S.img) { toast('Upload a template first','err'); return; }
+
+  const id   = 'ct_' + (++_ctIdx);
+  const size = parseInt(g('atSz').value) || S.cfg.size;
+  const col  = g('atCol').value || S.cfg.color;
+  const ctObj = {
+    id, text: txt,
+    top: 50, left: 50,
+    size, color: col,
+    font: S.cfg.font, weight: S.cfg.weight
+  };
+  S.customTexts.push(ctObj);
+  renderCustomOverlay(ctObj);
+
+  g('atInp').value = '';
+  g('addtxtPanel').classList.remove('open');
+  toast(`"${txt}" added — drag to position`,'ok');
+  // Auto-unlock if locked so user sees change
+  if (S.locked) { S.locked = null; g('btnOk').classList.remove('locked'); g('btnOk').innerHTML = '⊙ OK'; g('lockBadge').classList.remove('on'); }
+}
+
+function renderCustomOverlay(ct) {
+  const pc = g('pc');
+  const div = document.createElement('div');
+  div.className  = 'ov-custom';
+  div.dataset.cid = ct.id;
+  div.style.top  = ct.top  + '%';
+  div.style.left = ct.left + '%';
+  div.innerHTML  =
+    `<div class="ov-del" title="Remove" data-cid="${ct.id}">✕</div>` +
+    `<div class="ov-txt ov-ctxt" id="txt_${ct.id}">${ct.text}</div>` +
+    `<div class="dh">⠿</div>`;
+  // Apply text style
+  const txtEl = div.querySelector('.ov-ctxt');
+  applyCustomStyle(txtEl, ct);
+  // Delete button
+  div.querySelector('.ov-del').addEventListener('click', e => {
+    e.stopPropagation();
+    removeCustomText(ct.id);
+  });
+  // Double-tap / double-click to edit inline
+  let _tapT = 0;
+  const editFn = () => {
+    const now = Date.now();
+    if (now - _tapT < 400) {
+      const cur = ct.text;
+      const nw = prompt('Edit text:', cur);
+      if (nw !== null && nw.trim()) {
+        ct.text = nw.trim();
+        txtEl.textContent = ct.text;
+      }
+    }
+    _tapT = now;
+  };
+  div.addEventListener('click', editFn);
+  pc.appendChild(div);
+  mkDragCustom(div, ct);
+}
+
+function applyCustomStyle(el, ct) {
+  el.style.fontFamily    = ct.font;
+  el.style.fontSize      = ct.size + 'px';
+  el.style.color         = ct.color;
+  el.style.fontWeight    = ct.weight;
+  el.style.textShadow    = '1px 1px 4px rgba(0,0,0,.95)';
+  el.style.letterSpacing = S.cfg.ls + 'px';
+  el.style.whiteSpace    = 'nowrap';
+  el.style.lineHeight    = '1';
+}
+
+function removeCustomText(id) {
+  S.customTexts = S.customTexts.filter(c => c.id !== id);
+  const el = g('pc').querySelector(`[data-cid="${id}"]`);
+  if (el) el.remove();
+  toast('Text removed','');
+}
+
+function mkDragCustom(el, ct) {
+  let on=false, sx,sy,sl,st;
+  const dn = e => {
+    if (e.target.classList.contains('ov-del')) return;
+    if (!S.img) return;
+    if (S.locked) { toast('Unlock first (click ✓ Locked)','err'); return; }
+    on=true; el.classList.add('dragging');
+    const p = e.touches?e.touches[0]:e;
+    sx=p.clientX; sy=p.clientY; sl=ct.left; st=ct.top;
+    e.preventDefault();
+  };
+  const mv = e => {
+    if (!on) return;
+    const p = e.touches?e.touches[0]:e;
+    const r = g('pc').getBoundingClientRect();
+    ct.left = Math.max(0,Math.min(100, sl+(p.clientX-sx)/r.width*100));
+    ct.top  = Math.max(0,Math.min(100, st+(p.clientY-sy)/r.height*100));
+    el.style.left = ct.left+'%';
+    el.style.top  = ct.top+'%';
+    e.preventDefault();
+  };
+  const up = ()=>{ on=false; el.classList.remove('dragging'); };
+  el.addEventListener('mousedown', dn,{passive:false});
+  el.addEventListener('touchstart',dn,{passive:false});
+  document.addEventListener('mousemove', mv,{passive:false});
+  document.addEventListener('touchmove', mv,{passive:false});
+  document.addEventListener('mouseup', up);
+  document.addEventListener('touchend',up);
+}
+
+// Guides
+g('btnGd').addEventListener('click', () => {
+  S.guides = !S.guides;
+  g('guides').style.display = S.guides ? 'block' : 'none';
+  g('btnGd').classList.toggle('on', S.guides);
+});
+
+// ── Settings panel ─────────────────────────────────────
+g('btnSet').addEventListener('click', () => { g('sbg').classList.add('open'); syncSI(); syncPI(); });
+g('btnCS').addEventListener('click',  () => g('sbg').classList.remove('open'));
+g('sbg').addEventListener('click', e => { if (e.target===g('sbg')) g('sbg').classList.remove('open'); });
+
+function syncSI() {
+  g('sSize').value = S.cfg.size; g('sSzV').textContent = S.cfg.size+'px';
+  g('sCol').value  = S.cfg.color; g('sColV').textContent = S.cfg.color;
+  g('sSh').value   = S.cfg.shadow;
+  g('tbShadowOn').checked = (S.cfg.shadow !== 'none');
+  g('shSub').style.display = (S.cfg.shadow === 'custom') ? '' : 'none';
+  g('sShCol').value = S.cfg.shadowColor || '#000000';
+  g('sShBlur').value = S.cfg.shadowBlur != null ? S.cfg.shadowBlur : 4;
+  g('sShBlurV').textContent = (S.cfg.shadowBlur != null ? S.cfg.shadowBlur : 4) + 'px';
+  g('sShOp').value = S.cfg.shadowOpacity != null ? S.cfg.shadowOpacity : 90;
+  g('sShOpV').textContent = (S.cfg.shadowOpacity != null ? S.cfg.shadowOpacity : 90) + '%';
+  g('sWt').value   = S.cfg.weight;
+  g('sLS').value   = S.cfg.ls; g('sLSV').textContent = S.cfg.ls+'px';
+  g('sFm').value   = S.cfg.fmt;
+  g('sDf').value   = S.cfg.dfmt;
+}
+function syncPI() {
+  g('p1T').value = S.pos.g1.top.toFixed(2);  g('p1L').value = S.pos.g1.left.toFixed(2);
+  g('p8T').value = S.pos.g8.top.toFixed(2);  g('p8L').value = S.pos.g8.left.toFixed(2);
+  g('pDT').value = S.pos.dt.top.toFixed(2);  g('pDL').value = S.pos.dt.left.toFixed(2);
+  g('pCT').value = S.pos.chg.top.toFixed(2); g('pCL').value = S.pos.chg.left.toFixed(2);
+  g('pST').value = S.pos.spark.top.toFixed(2); g('pSL').value = S.pos.spark.left.toFixed(2);
+  g('pSW').value = S.pos.spark.w.toFixed(2);   g('pSH').value = S.pos.spark.h.toFixed(2);
+}
+
+// Settings panel live changes
+g('sSize').addEventListener('input', () => { S.cfg.size = +g('sSize').value; g('sSzV').textContent = S.cfg.size+'px'; applyStyle(); });
+g('sCol').addEventListener('input',  () => { S.cfg.color = g('sCol').value; g('sColV').textContent = S.cfg.color; g('tbColor').value = S.cfg.color; applyStyle(); refreshSparkline(); });
+g('sSh').addEventListener('change',  () => {
+  S.cfg.shadow = g('sSh').value;
+  if (S.cfg.shadow !== 'none') S.cfg.lastShadow = S.cfg.shadow;
+  g('tbShadowOn').checked = (S.cfg.shadow !== 'none');
+  g('shSub').style.display = (S.cfg.shadow === 'custom') ? '' : 'none';
+  applyStyle();
+});
+
+// ── Shadow on/off toggle (toolbar) — flips between 'none' and the last chosen style ──
+g('tbShadowOn').addEventListener('change', () => {
+  if (g('tbShadowOn').checked) {
+    S.cfg.shadow = S.cfg.lastShadow || 'dark';
+  } else {
+    if (S.cfg.shadow !== 'none') S.cfg.lastShadow = S.cfg.shadow;
+    S.cfg.shadow = 'none';
+  }
+  g('sSh').value = S.cfg.shadow;
+  g('shSub').style.display = (S.cfg.shadow === 'custom') ? '' : 'none';
+  applyStyle();
+});
+
+// ── Custom shadow: colour, blur, opacity ──
+g('sShCol').addEventListener('input', () => {
+  S.cfg.shadowColor = g('sShCol').value;
+  if (S.cfg.shadow !== 'custom') { S.cfg.shadow = 'custom'; S.cfg.lastShadow = 'custom'; g('sSh').value = 'custom'; g('shSub').style.display = ''; }
+  applyStyle();
+});
+g('sShBlur').addEventListener('input', () => {
+  S.cfg.shadowBlur = +g('sShBlur').value;
+  g('sShBlurV').textContent = S.cfg.shadowBlur + 'px';
+  if (S.cfg.shadow !== 'custom') { S.cfg.shadow = 'custom'; S.cfg.lastShadow = 'custom'; g('sSh').value = 'custom'; g('shSub').style.display = ''; }
+  applyStyle();
+});
+g('sShOp').addEventListener('input', () => {
+  S.cfg.shadowOpacity = +g('sShOp').value;
+  g('sShOpV').textContent = S.cfg.shadowOpacity + '%';
+  if (S.cfg.shadow !== 'custom') { S.cfg.shadow = 'custom'; S.cfg.lastShadow = 'custom'; g('sSh').value = 'custom'; g('shSub').style.display = ''; }
+  applyStyle();
+});
+
+// ── Eyedropper: pick shadow colour from anywhere on screen (uploaded image, the poster, etc.) ──
+g('btnEyedrop').addEventListener('click', async () => {
+  if (!('EyeDropper' in window)) {
+    toast('Eyedropper not supported in this browser — try Chrome or Edge','err',4000);
+    return;
+  }
+  try {
+    const ed = new window.EyeDropper();
+    const result = await ed.open();
+    S.cfg.shadowColor = result.sRGBHex;
+    g('sShCol').value = result.sRGBHex;
+    if (S.cfg.shadow !== 'custom') { S.cfg.shadow = 'custom'; S.cfg.lastShadow = 'custom'; g('sSh').value = 'custom'; g('shSub').style.display = ''; }
+    applyStyle();
+    toast('Shadow colour picked: ' + result.sRGBHex,'ok');
+  } catch (e) {
+    // User cancelled the picker — no error needed
+  }
+});
+
+g('sWt').addEventListener('change',  () => { S.cfg.weight = g('sWt').value; applyStyle(); });
+g('sLS').addEventListener('input',   () => { S.cfg.ls = +g('sLS').value; g('sLSV').textContent = S.cfg.ls+'px'; applyStyle(); });
+g('sFm').addEventListener('change',  () => { S.cfg.fmt  = g('sFm').value; updateOvs(); });
+g('sDf').addEventListener('change',  () => { S.cfg.dfmt = g('sDf').value; updateOvs(); });
+
+g('btnAP').addEventListener('click', () => {
+  const p = (id, fb) => { const v = parseFloat(g(id).value); return isNaN(v) ? fb : v; };
+  S.pos.g1  = { top: p('p1T',S.pos.g1.top),   left: p('p1L',S.pos.g1.left) };
+  S.pos.g8  = { top: p('p8T',S.pos.g8.top),   left: p('p8L',S.pos.g8.left) };
+  S.pos.dt  = { top: p('pDT',S.pos.dt.top),   left: p('pDL',S.pos.dt.left) };
+  S.pos.chg = { top: p('pCT',S.pos.chg.top),  left: p('pCL',S.pos.chg.left) };
+  S.pos.spark = {
+    top:  p('pST',S.pos.spark.top), left: p('pSL',S.pos.spark.left),
+    w:    p('pSW',S.pos.spark.w),   h:    p('pSH',S.pos.spark.h)
+  };
+  applyPos(); toast('Positions applied','ok');
+});
+
+// Change indicator / sparkline toggles
+g('sChgOn').addEventListener('change', () => { S.chgOn = g('sChgOn').checked; applyStyle(); });
+g('sSparkOn').addEventListener('change', () => { S.sparkOn = g('sSparkOn').checked; refreshSparkline(); });
+
+// Sidebar quick toggles — mirror the Settings panel checkboxes
+g('qChgOn').addEventListener('change', () => { S.chgOn = g('qChgOn').checked; applyStyle(); });
+g('qSparkOn').addEventListener('change', () => { S.sparkOn = g('qSparkOn').checked; refreshSparkline(); });
+
+// Manually correct the rate logged for the day BEFORE the current poster date.
+// This is what the change indicator compares against, so editing it directly
+// fixes the comparison for the date currently selected.
+g('btnEditYest').addEventListener('click', () => {
+  const prevDate = new Date(S.date); prevDate.setDate(prevDate.getDate() - 1);
+  const cur = getPrevDayRate(S.date);
+  const nv = prompt(`Enter the 22K · 1g rate for ${fmtDate(prevDate)} (₹):`, cur != null ? cur : '');
+  if (nv === null) return;
+  const v = parseFloat(nv);
+  if (!v || v < 100) { toast('Enter a valid rate','err'); return; }
+  logRate(prevDate, v, true); // force overwrite
+  updateOvs();
+  refreshSparkline();
+  toast(`Rate for ${fmtDate(prevDate)} set: ₹${v.toLocaleString('en-IN')}`,'ok');
+});
+
+// ── Copy Rate as Text — ready-to-paste WhatsApp caption ──
+g('btnCopyTxt').addEventListener('click', async () => {
+  if (S.r1 == null) { toast('Fetch or enter a rate first','err'); return; }
+  const chg = fmtChg();
+  let chgLine = '';
+  if (chg.cls === 'up')   chgLine = `\n${chg.text} from yesterday`;
+  else if (chg.cls === 'dn') chgLine = `\n${chg.text} from yesterday`;
+  else if (chg.cls === 'flat' && chg.text !== '—') chgLine = `\n${chg.text}`;
+
+  const txt =
+    `✨ Everglo Gold Rate ✨\n` +
+    `📅 ${fmtDate(S.date)}\n\n` +
+    `22K Gold\n` +
+    `1g  : ₹${Math.round(S.r1).toLocaleString('en-IN')}\n` +
+    `8g  : ₹${Math.round(S.r8).toLocaleString('en-IN')}` +
+    chgLine +
+    `\n\n📞 Contact us for today's best rate`;
+
+  try {
+    await navigator.clipboard.writeText(txt);
+    toast('📋 Copied! Paste it as your WhatsApp caption','ok',3500);
+  } catch (e) {
+    // Fallback for browsers without Clipboard API permission (rare, but possible in some webviews)
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = txt;
+      ta.style.position = 'fixed'; ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      toast('📋 Copied! Paste it as your WhatsApp caption','ok',3500);
+    } catch (e2) {
+      toast('Could not copy — clipboard access blocked','err',4000);
+    }
+  }
+});
+
+g('btnSv').addEventListener('click', () => {
+  localStorage.setItem('gps_c', JSON.stringify(S.cfg));
+  localStorage.setItem('gps_p', JSON.stringify(S.pos));
+  localStorage.setItem('gps_extra', JSON.stringify({
+    chgOn: S.chgOn, chgSize: S.chgSize, chgColor: S.chgColor,
+    sparkOn: S.sparkOn, sparkSize: S.sparkSize, sparkColor: S.sparkColor
+  }));
+  toast('Settings saved!','ok');
+});
+g('btnLd').addEventListener('click', () => {
+  const c = localStorage.getItem('gps_c');
+  const p = localStorage.getItem('gps_p');
+  if (c) { Object.assign(S.cfg, JSON.parse(c)); syncSI(); applyStyle(); }
+  if (p) { Object.assign(S.pos, JSON.parse(p)); applyPos(); syncPI(); }
+  updateOvs(); toast('Settings loaded','ok');
+});
+g('btnCl').addEventListener('click', () => {
+  localStorage.removeItem('gps_c');
+  localStorage.removeItem('gps_p');
+  toast('Saved settings cleared','ok');
+});
+
+// ── Canvas export ──────────────────────────────────────
+// Uses S.locked snapshot if set, otherwise live state
+// ── Generates the final poster canvas. Returns {canvas, fname, snapDate} or throws. ──
+// Shared by both Download and Share so they always produce identical output.
+async function generatePosterCanvas() {
+  if (!S.img) throw new Error('NO_TEMPLATE');
+  await new Promise(r => setTimeout(r, 80));
+
+  // ── Use locked snapshot or live state ──
+  const snap = S.locked || {
+    pos: S.pos, cfg: S.cfg,
+    customTexts: S.customTexts,
+    r1: S.r1, r8: S.r8, date: S.date,
+    prevR1: getPrevDayRate(S.date), last7: getLast7(S.date),
+    chgOn: S.chgOn, chgSize: S.chgSize, chgColor: S.chgColor,
+    sparkOn: S.sparkOn, sparkSize: S.sparkSize, sparkColor: S.sparkColor
+  };
+
+    const img = new Image();
+    await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = S.img; });
+
+    const C = g('xc');
+    C.width  = img.naturalWidth;
+    C.height = img.naturalHeight;
+    const ctx = C.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+
+    const cr = g('pc').getBoundingClientRect();
+    const sc = (img.naturalWidth / cr.width + img.naturalHeight / cr.height) / 2;
+
+    // ── Helper: set up ctx style from a cfg object ──
+    function setupCtx(cfg) {
+      const cfs = Math.round(cfg.size * sc);
+      ctx.font         = `${cfg.weight} ${cfs}px ${cfg.font.replace(/'/g,'')}`;
+      ctx.fillStyle    = cfg.color;
+      ctx.textBaseline = 'middle';
+      ctx.textAlign    = 'center';   // MATCH HTML overlay (transform:translate(-50%,-50%))
+      try { ctx.letterSpacing = (cfg.ls * sc) + 'px'; } catch(e) {}
+      applyCtxShadow(cfg);
+    }
+
+    // ── Helper: apply shadow params to ctx (shared by main text + change indicator) ──
+    function applyCtxShadow(cfg) {
+      if (cfg.shadow === 'dark') {
+        ctx.shadowColor='rgba(0,0,0,.9)'; ctx.shadowBlur=4*sc; ctx.shadowOffsetX=1*sc; ctx.shadowOffsetY=1*sc;
+      } else if (cfg.shadow === 'glow') {
+        ctx.shadowColor='rgba(255,215,0,.7)'; ctx.shadowBlur=14*sc; ctx.shadowOffsetX=0; ctx.shadowOffsetY=0;
+      } else if (cfg.shadow === 'custom') {
+        const a = (cfg.shadowOpacity != null ? cfg.shadowOpacity : 90) / 100;
+        const b = (cfg.shadowBlur != null ? cfg.shadowBlur : 4) * sc;
+        ctx.shadowColor = hexToRgba(cfg.shadowColor || '#000000', a);
+        ctx.shadowBlur  = b;
+        ctx.shadowOffsetX = 1*sc; ctx.shadowOffsetY = 1*sc;
+      } else {
+        ctx.shadowColor='transparent'; ctx.shadowBlur=0;
+      }
+    }
+
+    // ── Draw main 3 fields using locked/live positions & style ──
+    setupCtx(snap.cfg);
+    const drawAt = (txt, pos) => {
+      ctx.fillText(txt, pos.left/100 * img.naturalWidth, pos.top/100 * img.naturalHeight);
+    };
+    // Format values using the SNAPSHOTTED fmt settings (not live)
+    const snapDate = snap.date instanceof Date ? snap.date : new Date(snap.date);
+    const _origFmt  = S.cfg.fmt;  const _origDfmt = S.cfg.dfmt;
+    S.cfg.fmt  = snap.cfg.fmt;
+    S.cfg.dfmt = snap.cfg.dfmt;
+    const txt1g  = fmtNum(snap.r1);
+    const txt8g  = fmtNum(snap.r8);
+    const txtDt  = fmtDate(snapDate);
+    S.cfg.fmt  = _origFmt;
+    S.cfg.dfmt = _origDfmt;
+    // Draw at SNAPSHOTTED positions
+    drawAt(txt1g,  snap.pos.g1);
+    drawAt(txt8g,  snap.pos.g8);
+    drawAt(txtDt,  snap.pos.dt);
+
+    // ── Draw change indicator (▲/▼ vs the day before the poster date) ──
+    const chgOn = snap.chgOn !== undefined ? snap.chgOn : true;
+    if (chgOn && snap.prevR1 != null && snap.r1 != null) {
+      const diff = Math.round(snap.r1) - Math.round(snap.prevR1);
+      const baseChgColor = snap.chgColor || snap.cfg.color;
+      const chgFontSize = snap.chgSize || snap.cfg.size;
+      let chgTxt = '● No Change', chgColor = baseChgColor;
+      if (diff > 0) { chgTxt = `▲ +₹${Math.abs(diff).toLocaleString('en-IN')}`; chgColor = '#E84040'; }
+      else if (diff < 0) { chgTxt = `▼ −₹${Math.abs(diff).toLocaleString('en-IN')}`; chgColor = '#4EC97A'; }
+      ctx.font = `900 ${Math.round(chgFontSize * sc)}px ${snap.cfg.font.replace(/'/g,'')}`;
+      ctx.fillStyle = chgColor;
+      ctx.textBaseline = 'middle';
+      ctx.textAlign = 'center';
+      try { ctx.letterSpacing = (snap.cfg.ls * sc) + 'px'; } catch(e) {}
+      applyCtxShadow(snap.cfg);
+      drawAt(chgTxt, snap.pos.chg);
+    }
+
+    // ── Draw 7-day sparkline ──
+    const sparkOn = snap.sparkOn !== undefined ? snap.sparkOn : true;
+    if (sparkOn && snap.last7 && snap.last7.some(d => d.v != null)) {
+      const sp = snap.pos.spark || { top: 48.0, left: 59.9, w: 26, h: 8 };
+      const boxW = (sp.w/100) * img.naturalWidth;
+      const boxH = (sp.h/100) * img.naturalHeight;
+      const cx0  = (sp.left/100) * img.naturalWidth  - boxW/2;
+      const cy0  = (sp.top /100) * img.naturalHeight - boxH/2;
+
+      const pts = snap.last7.map(d => d.v).filter(v => v != null);
+      const vMin = Math.min(...pts), vMax = Math.max(...pts);
+      const range = (vMax - vMin) || 1;
+      const n = snap.last7.length;
+      const stepX = boxW / (n - 1);
+
+      const coords = snap.last7.map((d, i) => {
+        if (d.v == null) return null;
+        const x = cx0 + i * stepX;
+        const y = cy0 + boxH - ((d.v - vMin) / range) * boxH;
+        return { x, y };
+      });
+
+      // Line
+      const baseSparkColor = snap.sparkColor || snap.cfg.color;
+      const sparkSzScale   = (snap.sparkSize || snap.cfg.size) / 14; // 14px = baseline 1x scale
+      ctx.save();
+      ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+      ctx.strokeStyle = baseSparkColor;
+      ctx.lineWidth = Math.max(1, 1.6 * sc * sparkSzScale);
+      ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+      ctx.beginPath();
+      let started = false;
+      coords.forEach(p => {
+        if (!p) { started = false; return; }
+        if (!started) { ctx.moveTo(p.x, p.y); started = true; }
+        else ctx.lineTo(p.x, p.y);
+      });
+      ctx.stroke();
+
+      // Dots — base spark colour for mid points, green/red highlight on last point vs prev
+      coords.forEach((p, i) => {
+        if (!p) return;
+        const isLast = i === n - 1;
+        let dotColor = baseSparkColor;
+        if (isLast && coords[i-1]) {
+          dotColor = (snap.last7[i].v > snap.last7[i-1].v) ? '#E84040'
+                   : (snap.last7[i].v < snap.last7[i-1].v) ? '#4EC97A'
+                   : baseSparkColor;
+        }
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, Math.max(1.5, 2.2*sc*sparkSzScale), 0, Math.PI*2);
+        ctx.fillStyle = dotColor;
+        ctx.fill();
+      });
+      ctx.restore();
+    }
+
+    // ── Draw custom text overlays ──
+    if (snap.customTexts && snap.customTexts.length) {
+      snap.customTexts.forEach(ct => {
+        const ctcfs = Math.round(ct.size * sc);
+        ctx.font         = `${ct.weight} ${ctcfs}px ${ct.font.replace(/'/g,'')}`;
+        ctx.fillStyle    = ct.color;
+        ctx.textBaseline = 'middle';
+        ctx.textAlign    = 'center';
+        ctx.shadowColor  = 'rgba(0,0,0,.85)';
+        ctx.shadowBlur   = 3 * sc;
+        ctx.shadowOffsetX = 1*sc; ctx.shadowOffsetY = 1*sc;
+        ctx.fillText(ct.text, ct.left/100 * img.naturalWidth, ct.top/100 * img.naturalHeight);
+      });
+    }
+
+    return { canvas: C, snapDate, snap };
+}
+
+// ── Encodes the generated canvas to a Blob in the chosen format ──
+function canvasToBlob(canvas, fmt) {
+  const mime = fmt === 'jpeg' ? 'image/jpeg' : 'image/png';
+  return new Promise(resolve => canvas.toBlob(resolve, mime, fmt === 'jpeg' ? 0.95 : 1));
+}
+
+// ── Download Poster button ──
+g('btnDl').addEventListener('click', async () => {
+  if (!S.img) { toast('Upload a template first!','err'); return; }
+  g('btnDl').disabled = true;
+  g('btnDl').innerHTML = '<span class="spin">◌</span> Generating…';
+  toast('Generating poster…','',15000);
+  try {
+    const { canvas, snapDate } = await generatePosterCanvas();
+    const fmt  = g('sfmt').value;
+    const mime = fmt === 'jpeg' ? 'image/jpeg' : 'image/png';
+    const url  = canvas.toDataURL(mime, fmt === 'jpeg' ? 0.95 : 1);
+    const fname = `gold-poster-${snapDate.toISOString().slice(0,10)}.${fmt}`;
+
+    const a = document.createElement('a');
+    a.href = url; a.download = fname;
+    document.body.appendChild(a); a.click();
+    setTimeout(() => document.body.removeChild(a), 300);
+
+    const src = S.locked ? ' (locked)' : ' (live)';
+    toast('✓ Poster downloaded!' + src,'ok');
+    g('dlinfo').textContent = '✓ ' + fname + src;
+
+  } catch(err) {
+    if (err.message === 'NO_TEMPLATE') { toast('Upload a template first!','err'); }
+    else { toast('Export error: ' + err.message,'err',6000); console.error(err); }
+  } finally {
+    g('btnDl').disabled = false;
+    g('btnDl').innerHTML = '⬇ Download Poster';
+  }
+});
+
+// ── Share Poster button — opens the native share sheet (WhatsApp, etc.) on mobile ──
+g('btnShare').addEventListener('click', async () => {
+  if (!S.img) { toast('Upload a template first!','err'); return; }
+  if (!navigator.share || !navigator.canShare) {
+    toast('Sharing not supported here — use Download instead','err',4000);
+    return;
+  }
+  g('btnShare').disabled = true;
+  g('btnShare').innerHTML = '<span class="spin">◌</span> Preparing…';
+  toast('Preparing poster to share…','',15000);
+  try {
+    const { canvas, snapDate } = await generatePosterCanvas();
+    const fmt  = g('sfmt').value;
+    const blob = await canvasToBlob(canvas, fmt);
+    const fname = `gold-poster-${snapDate.toISOString().slice(0,10)}.${fmt}`;
+    const file = new File([blob], fname, { type: blob.type });
+
+    if (!navigator.canShare({ files: [file] })) {
+      toast('This device can\'t share images directly — use Download','err',4000);
+      return;
+    }
+    await navigator.share({
+      files: [file],
+      title: 'Today\'s Gold Rate',
+      text: `Everglo Gold Rate · ${fmtDate(snapDate)}`
+    });
+    toast('✓ Shared!','ok');
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      // User cancelled the share sheet — not an error
+    } else if (err.message === 'NO_TEMPLATE') {
+      toast('Upload a template first!','err');
+    } else {
+      toast('Share failed: ' + err.message,'err',6000);
+      console.error(err);
+    }
+  } finally {
+    g('btnShare').disabled = false;
+    g('btnShare').innerHTML = '📤 Share';
+  }
+});
+
+// ── Auto-scheduled fetch (IST) ─────────────────────────
+const SCHED = ['09:00','11:30','14:10','15:30'];
+let _lastSched = '';
+setInterval(() => {
+  try {
+    const ist = new Date(new Date().toLocaleString('en-US', {timeZone:'Asia/Kolkata'}));
+    const hm  = `${String(ist.getHours()).padStart(2,'0')}:${String(ist.getMinutes()).padStart(2,'0')}`;
+    if (SCHED.includes(hm) && hm !== _lastSched && ist.getSeconds() < 45) {
+      _lastSched = hm;
+      toast(`⏰ Auto-fetch at ${hm} IST…`,'',4000);
+      fetchLive();
+    }
+  } catch(e) {}
+}, 30000);
+
+// Lightweight auto-refresh every 5 min — keeps change indicator + sparkline
+// live without waiting for the 4 fixed schedule slots above.
+setInterval(() => { fetchLive(); }, 5 * 60 * 1000);
+
+// ── Init ───────────────────────────────────────────────
+function init() {
+  setDate(new Date());
+  applyPos();
+  applyStyle();
+  // Restore saved source toggle (akgsma / bullions)
+  try {
+    const sv = localStorage.getItem('gps_source');
+    if (sv === 'bullions' || sv === 'akgsma') setSource(sv);
+  } catch(e) {}
+  // Restore mini rate badges (shows last known ₹ + color even before first fetch)
+  ['akgsma','bullions'].forEach(src => {
+    try {
+      const v = JSON.parse(localStorage.getItem('gps_lastrate_' + src) || 'null');
+      if (v && typeof v.r === 'number') {
+        const elId = src === 'bullions' ? 'srcMiniBul' : 'srcMiniAkg';
+        g(elId).textContent = `₹${v.r.toLocaleString('en-IN')}`;
+        S.lastRates[src] = { r: v.r, cls: 'flat' };
+      }
+    } catch(e) {}
+  });
+  // Hide the Share button on browsers/devices that can't share files
+  // (desktop Chrome/Firefox mainly) — no point showing a button that always fails.
+  if (!navigator.share || !navigator.canShare) {
+    g('btnShare').style.display = 'none';
+  }
+  // Restore saved settings
+  try {
+    const c = localStorage.getItem('gps_c');
+    const p = localStorage.getItem('gps_p');
+    if (c) { Object.assign(S.cfg, JSON.parse(c)); applyStyle(); }
+    if (p) { Object.assign(S.pos, JSON.parse(p)); applyPos(); }
+  } catch(e) {}
+  // Restore chg/sparkline toggle + size/colour settings
+  try {
+    const e2 = localStorage.getItem('gps_extra');
+    if (e2) {
+      const ex = JSON.parse(e2);
+      if (typeof ex.chgOn === 'boolean') S.chgOn = ex.chgOn;
+      if (typeof ex.sparkOn === 'boolean') S.sparkOn = ex.sparkOn;
+      if (typeof ex.chgSize === 'number') S.chgSize = ex.chgSize;
+      if (typeof ex.chgColor === 'string') S.chgColor = ex.chgColor;
+      if (typeof ex.sparkSize === 'number') S.sparkSize = ex.sparkSize;
+      if (typeof ex.sparkColor === 'string') S.sparkColor = ex.sparkColor;
+      applyStyle();
+    }
+  } catch(e) {}
+  // One-time migration: fold any old single-value "yesterday" stash into the
+  // new date-keyed history log, then remove the legacy keys.
+  try {
+    const legacyY = localStorage.getItem('gps_yesterday_r1');
+    if (legacyY) {
+      const yd = JSON.parse(legacyY);
+      if (yd && yd.date && yd.v) logRate(new Date(yd.date + 'T00:00:00'), yd.v);
+      localStorage.removeItem('gps_yesterday_r1');
+    }
+    const legacyP = localStorage.getItem('gps_today_pending');
+    if (legacyP) {
+      const pd = JSON.parse(legacyP);
+      if (pd && pd.date && pd.v) logRate(new Date(pd.date + 'T00:00:00'), pd.v);
+      localStorage.removeItem('gps_today_pending');
+    }
+  } catch(e) {}
+  updateOvs();
+  refreshSparkline();
+  // Restore the previously uploaded template — saves re-uploading every session
+  try {
+    const savedImg = localStorage.getItem('gps_template_img');
+    if (savedImg) {
+      S.img = savedImg;
+      const testImg = new Image();
+      testImg.onload = () => {
+        g('pbg').src   = savedImg;
+        g('pph').style.display   = 'none';
+        g('pc').style.display    = 'inline-block';
+        g('dlbar').style.display = 'flex';
+        g('thumb').src           = savedImg;
+        g('thumb').style.display = 'block';
+        g('dzi').innerHTML =
+          `<div class="dzico" style="color:var(--grn)">✓</div>` +
+          `<div class="dztxt">Template restored from last session</div>` +
+          `<div class="dzsub">tap to change</div>`;
+        updateOvs();
+      };
+      testImg.onerror = () => {
+        // Corrupted/stale entry — clear it so it doesn't keep failing silently
+        localStorage.removeItem('gps_template_img');
+        S.img = null;
+      };
+      testImg.src = savedImg;
+    }
+  } catch(e) {}
+  // Restore lock state
+  try {
+    const lk = localStorage.getItem('gps_lock');
+    if (lk) {
+      S.locked = JSON.parse(lk);
+      g('btnOk').classList.add('locked');
+      g('btnOk').innerHTML = '🔒 Locked';
+      g('lockBadge').classList.add('on');
+      // Show locked state on overlays (after render)
+      setTimeout(() => {
+        document.querySelectorAll('.ov,.ov-custom,.ov-spark').forEach(el => {
+          el.style.cursor  = 'not-allowed';
+          el.style.outline = '1px solid rgba(78,201,122,.4)';
+        });
+      }, 200);
+      toast('🔒 Restored locked positions from last session','ok',3500);
+    }
+  } catch(e) {}
+  // Auto-fetch on load
+  setTimeout(fetchLive, 1000);
+  setTimeout(() => g('ld').classList.add('gone'), 800);
+}
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
